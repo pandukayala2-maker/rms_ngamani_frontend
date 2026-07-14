@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --bg-page: #f9f9f7;
+  --bg-surface: #ffffff;
+  --bg-surface-2: #f3f4f6;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --border-color: rgba(11, 11, 11, 0.1);
+}
+
+:root.dark {
+  color-scheme: dark;
+  --bg-page: #0d0d0d;
+  --bg-surface: #17171a;
+  --bg-surface-2: #202024;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  @apply antialiased;
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+.glass-card {
+  @apply rounded-2xl border shadow-glass backdrop-blur-xs;
+  background: color-mix(in srgb, var(--bg-surface) 80%, transparent);
+  border-color: var(--border-color);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 999px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface-2) 0px,
+    rgba(255, 255, 255, 0.15) 40px,
+    var(--bg-surface-2) 80px
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite linear;
+}
