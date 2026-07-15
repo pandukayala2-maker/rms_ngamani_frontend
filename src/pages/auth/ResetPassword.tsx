@@ -56,7 +56,12 @@ export default function ResetPassword() {
           error={errors.confirmPassword?.message}
           {...register("confirmPassword")}
         />
-        <Button type="submit" className="w-full" isLoading={resetPassword.isPending} disabled={!token}>
+        <Button
+          type="submit"
+          className="w-full !bg-gradient-to-r !from-amber-400 !to-orange-600 !text-neutral-950 hover:!opacity-90"
+          isLoading={resetPassword.isPending}
+          disabled={!token}
+        >
           Reset password
         </Button>
         {!token && <p className="text-xs text-red-500">Missing reset token. Use the link from your email.</p>}

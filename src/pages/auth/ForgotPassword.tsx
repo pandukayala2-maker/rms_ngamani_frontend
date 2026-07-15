@@ -34,12 +34,16 @@ export default function ForgotPassword() {
       </p>
       <form onSubmit={onSubmit} className="space-y-4">
         <Input label="Email" type="email" error={errors.email?.message} {...register("email")} />
-        <Button type="submit" className="w-full" isLoading={forgotPassword.isPending}>
+        <Button
+          type="submit"
+          className="w-full !bg-gradient-to-r !from-amber-400 !to-orange-600 !text-neutral-950 hover:!opacity-90"
+          isLoading={forgotPassword.isPending}
+        >
           Send reset link
         </Button>
       </form>
       <p className="mt-6 text-center text-xs">
-        <Link to="/login" className="text-brand-600 hover:underline">
+        <Link to="/login" className="text-amber-400 hover:underline">
           Back to sign in
         </Link>
       </p>

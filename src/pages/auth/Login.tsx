@@ -44,15 +44,19 @@ export default function Login() {
         <Input label="Email" type="email" placeholder="admin@spiceroute.com" error={errors.email?.message} {...register("email")} />
         <Input label="Password" type="password" placeholder="********" error={errors.password?.message} {...register("password")} />
         <div className="flex justify-end">
-          <Link to="/forgot-password" className="text-xs text-brand-600 hover:underline">
+          <Link to="/forgot-password" className="text-xs text-amber-400 hover:underline">
             Forgot password?
           </Link>
         </div>
-        <Button type="submit" className="w-full" isLoading={login.isPending}>
+        <Button
+          type="submit"
+          className="w-full !bg-gradient-to-r !from-amber-400 !to-orange-600 !text-neutral-950 hover:!opacity-90"
+          isLoading={login.isPending}
+        >
           Sign in
         </Button>
       </form>
-      <p className="mt-6 text-center text-xs text-[var(--text-muted)]">
+      <p className="mt-6 text-center text-xs text-neutral-500">
         Demo: admin@spiceroute.com / Password@123
       </p>
     </div>
