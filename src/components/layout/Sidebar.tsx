@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import clsx from "clsx";
+import { FaUtensils } from "react-icons/fa6";
 import {
   HiOutlineSquares2X2,
   HiOutlineClipboardDocumentList,
@@ -14,6 +15,7 @@ import {
   HiOutlineSparkles,
 } from "react-icons/hi2";
 import { useAuthStore } from "../../store/authStore";
+import { useSettings } from "../../hooks/useSettings";
 import type { Role } from "../../types";
 
 interface NavItem {
@@ -63,15 +65,16 @@ const navSections: NavSection[] = [
 export function Sidebar() {
   const user = useAuthStore((s) => s.user);
   const role = user?.role;
+  const { data: settings } = useSettings();
 
   return (
     <aside className="hidden md:flex w-64 shrink-0 flex-col gap-1 border-r border-[var(--border-color)] bg-[var(--bg-surface)]/70 p-4 backdrop-blur-xl">
       <div className="mb-6 flex items-center gap-2.5 px-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-violet-600 text-white font-bold shadow-lg shadow-brand-600/20">
-          Q
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 shadow-lg shadow-brand-600/20">
+          <FaUtensils className="text-white" size={16} />
         </div>
-        <div>
-          <p className="text-sm font-semibold leading-tight">QR Menu POS</p>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold leading-tight">{settings?.restaurantName ?? "Nagami Hotel"}</p>
           <p className="text-xs text-[var(--text-muted)] leading-tight">Restaurant OS</p>
         </div>
       </div>

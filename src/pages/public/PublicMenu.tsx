@@ -19,6 +19,7 @@ import {
   HiOutlineSquares2X2,
   HiOutlineBars3,
   HiOutlineXMark,
+  HiOutlineMagnifyingGlass,
 } from "react-icons/hi2";
 import { api, getErrorMessage } from "../../lib/axios";
 import { resolveAssetUrl } from "../../lib/assets";
@@ -48,6 +49,11 @@ type ViewMode = "grid" | "list";
 
 const spicyDots: Record<string, number> = { NONE: 0, MILD: 1, MEDIUM: 2, HOT: 3, EXTRA_HOT: 4 };
 
+const currencySymbols: Record<string, string> = { INR: "₹", USD: "$", EUR: "€", GBP: "£", KWD: "KD " };
+function currencyLabel(code: string) {
+  return currencySymbols[code] ?? `${code} `;
+}
+
 function categoryIcon(name: string) {
   const n = name.toLowerCase();
   if (n.includes("breakfast") || n.includes("tiffin")) return HiOutlineSun;
@@ -62,6 +68,7 @@ export default function PublicMenu() {
   const { token } = useParams<{ token: string }>();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [search, setSearch] = useState("");
   const [cart, setCart] = useState<Record<string, CartLine>>({});
   const [cartOpen, setCartOpen] = useState(false);
   const [detailItem, setDetailItem] = useState<MenuItem | null>(null);
@@ -166,25 +173,32 @@ export default function PublicMenu() {
   }
 
   const currentCategory = activeCategory ?? data.categories[0]?.id;
-  const currency = data.restaurant.currency === "INR" ? "₹" : data.restaurant.currency;
-  const currentItems = data.categories.filter((cat) => cat.id === currentCategory).flatMap((cat) => cat.items);
+  const currency = currencyLabel(data.restaurant.currency);
+  const isSearching = search.trim().length > 0;
+  const currentItems = isSearching
+    ? data.categories
+        .flatMap((cat) => cat.items)
+        .filter((item) => item.name.toLowerCase().includes(search.trim().toLowerCase()))
+    : data.categories.filter((cat) => cat.id === currentCategory).flatMap((cat) => cat.items);
 
   return (
     <div className="min-h-screen bg-neutral-950 pb-28 text-neutral-100">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-neutral-900 to-neutral-950 px-4 pb-6 pt-8">
+      <div className="relative overflow-hidden bg-gradient-to-b from-neutral-900 to-neutral-950 px-4 pb-5 pt-6">
         <div className="pointer-events-none absolute -top-24 right-0 h-56 w-56 rounded-full bg-amber-500/10 blur-3xl" />
-        <div className="mx-auto max-w-2xl text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 shadow-lg shadow-orange-900/40">
-            {data.restaurant.logo ? (
-              <img src={resolveAssetUrl(data.restaurant.logo)} alt="" className="h-full w-full rounded-2xl object-cover" />
-            ) : (
-              <FaUtensils className="text-white" size={22} />
-            )}
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 shadow-lg shadow-orange-900/40">
+              {data.restaurant.logo ? (
+                <img src={resolveAssetUrl(data.restaurant.logo)} alt="" className="h-full w-full rounded-2xl object-cover" />
+              ) : (
+                <FaUtensils className="text-white" size={18} />
+              )}
+            </div>
+            <h1 className="truncate text-xl font-bold tracking-tight">{data.restaurant.name}</h1>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">{data.restaurant.name}</h1>
           {data.table && (
-            <span className="mt-2 inline-block rounded-full bg-white/10 px-3 py-1 text-xs text-amber-300">
+            <span className="shrink-0 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-amber-300">
               {data.table.name}
             </span>
           )}
@@ -218,34 +232,46 @@ export default function PublicMenu() {
         </div>
       )}
 
-      {/* Category nav */}
-      <div className="sticky top-0 z-10 mx-auto max-w-2xl px-4 pt-4">
-        <div className="flex gap-2 overflow-x-auto rounded-2xl bg-neutral-900/90 p-2 shadow-lg shadow-black/30 backdrop-blur-md scrollbar-thin">
-          {data.categories.map((cat) => {
-            const Icon = categoryIcon(cat.name);
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-                  currentCategory === cat.id
-                    ? "bg-gradient-to-r from-amber-500 to-orange-600 text-neutral-950"
-                    : "text-neutral-300 hover:bg-white/5"
-                }`}
-              >
-                <Icon size={15} />
-                {cat.name}
-              </button>
-            );
-          })}
+      {/* Search + category grid */}
+      <div className="sticky top-0 z-10 mx-auto max-w-2xl space-y-2 bg-neutral-950/95 px-4 pt-4 pb-2 backdrop-blur-md">
+        <div className="relative">
+          <HiOutlineMagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={16} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search dishes..."
+            className="w-full rounded-xl border border-white/10 bg-neutral-900 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-neutral-500 focus:border-amber-500/50 focus:outline-none"
+          />
         </div>
+
+        {!isSearching && (
+          <div className="grid max-h-32 grid-cols-2 gap-2 overflow-y-auto scrollbar-thin">
+            {data.categories.map((cat) => {
+              const Icon = categoryIcon(cat.name);
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                    currentCategory === cat.id
+                      ? "bg-gradient-to-r from-amber-500 to-orange-600 text-neutral-950"
+                      : "bg-neutral-900 text-neutral-300 hover:bg-white/5"
+                  }`}
+                >
+                  <Icon size={15} className="shrink-0" />
+                  <span className="truncate">{cat.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Section header with view toggle */}
       <div className="mx-auto max-w-2xl px-4 pt-5">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-semibold text-neutral-300">
-            {data.categories.find((c) => c.id === currentCategory)?.name ?? "Menu"}
+            {isSearching ? `Results for "${search.trim()}"` : data.categories.find((c) => c.id === currentCategory)?.name ?? "Menu"}
           </p>
           <div className="flex items-center gap-1 rounded-lg bg-neutral-900 p-1">
             <button
@@ -389,17 +415,25 @@ export default function PublicMenu() {
               >
                 <HiOutlineXMark size={18} />
               </button>
-              {detailItem.image ? (
-                <img src={resolveAssetUrl(detailItem.image)} alt="" className="h-56 w-full object-cover" />
-              ) : (
-                <div className="h-56 w-full bg-neutral-800" />
-              )}
-              <div className="max-h-[50vh] overflow-y-auto scrollbar-thin p-5">
-                <div className="flex items-center gap-1.5">
+              <div className="max-h-[75vh] overflow-y-auto scrollbar-thin p-6 text-center">
+                <div className="mx-auto h-44 w-44 overflow-hidden rounded-2xl shadow-lg shadow-black/40">
+                  {detailItem.image ? (
+                    <img src={resolveAssetUrl(detailItem.image)} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full bg-neutral-800" />
+                  )}
+                </div>
+
+                <div className="mt-4 flex items-center justify-center gap-1.5">
                   <VegDot isVeg={detailItem.isVeg} />
                   <h2 className="text-xl font-bold">{detailItem.name}</h2>
                 </div>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
+                <p className="mt-1.5 text-2xl font-bold text-amber-400">
+                  {currency}
+                  {detailItem.discountPrice ?? detailItem.price}
+                </p>
+
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                   {detailItem.isBestseller && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-400">
                       <HiOutlineFire size={11} /> Bestseller
@@ -414,9 +448,11 @@ export default function PublicMenu() {
                     <span className="text-xs text-red-400">{"🌶".repeat(spicyDots[detailItem.spicyLevel])}</span>
                   )}
                 </div>
-                {detailItem.description && <p className="mt-3 text-sm text-neutral-400">{detailItem.description}</p>}
+                {detailItem.description && (
+                  <p className="mx-auto mt-3 max-w-sm text-sm text-neutral-400">{detailItem.description}</p>
+                )}
                 {detailItem.ingredients.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                  <div className="mt-3 flex flex-wrap justify-center gap-1.5">
                     {detailItem.ingredients.map((ing) => (
                       <span key={ing} className="rounded-full bg-neutral-800 px-2 py-1 text-[11px] text-neutral-300">
                         {ing}
@@ -425,22 +461,16 @@ export default function PublicMenu() {
                   </div>
                 )}
 
-                <div className="mt-5 flex items-center justify-between">
-                  <p className="text-2xl font-bold text-amber-400">
-                    {currency}
-                    {detailItem.discountPrice ?? detailItem.price}
-                  </p>
-                  <button
-                    onClick={() => {
-                      addToCart(detailItem);
-                      setDetailItem(null);
-                      toast.success(`${detailItem.name} added to cart`);
-                    }}
-                    className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-600 px-6 py-3 text-sm font-semibold text-neutral-950"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    addToCart(detailItem);
+                    setDetailItem(null);
+                    toast.success(`${detailItem.name} added to cart`);
+                  }}
+                  className="mt-6 w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-600 py-3.5 text-sm font-bold text-neutral-950"
+                >
+                  Add to Cart
+                </button>
               </div>
             </motion.div>
           </div>

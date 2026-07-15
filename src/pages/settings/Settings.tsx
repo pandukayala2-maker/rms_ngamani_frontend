@@ -42,6 +42,7 @@ export default function Settings() {
           <Input label="GST / VAT Number" {...register("gstVat")} />
           <Select label="Currency" {...register("currency")}>
             <option value="INR">INR (₹)</option>
+            <option value="KWD">KWD (KD)</option>
             <option value="USD">USD ($)</option>
             <option value="EUR">EUR (€)</option>
             <option value="GBP">GBP (£)</option>
