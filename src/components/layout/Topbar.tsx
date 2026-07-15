@@ -11,7 +11,7 @@ export function Topbar({ title }: { title: string }) {
   const navigate = useNavigate();
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-surface)]/80 px-6 backdrop-blur-md">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-surface)]/70 px-6 backdrop-blur-xl">
       <h1 className="text-lg font-semibold">{title}</h1>
       <div className="flex items-center gap-3">
         <button
