@@ -1,24 +1,39 @@
+import { lazy, Suspense, type ComponentType } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { AuthLayout } from "../components/layout/AuthLayout";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
-import Login from "../pages/auth/Login";
-import ForgotPassword from "../pages/auth/ForgotPassword";
-import ResetPassword from "../pages/auth/ResetPassword";
-import Dashboard from "../pages/dashboard/Dashboard";
-import MenuList from "../pages/menu/MenuList";
-import Categories from "../pages/menu/Categories";
-import QRManagement from "../pages/qr/QRManagement";
-import POS from "../pages/pos/POS";
-import Orders from "../pages/orders/Orders";
-import Tables from "../pages/tables/Tables";
-import Inventory from "../pages/inventory/Inventory";
-import Customers from "../pages/customers/Customers";
-import Staff from "../pages/staff/Staff";
-import Reports from "../pages/reports/Reports";
-import SettingsPage from "../pages/settings/Settings";
-import PublicMenu from "../pages/public/PublicMenu";
-import NotFound from "../pages/NotFound";
+import { PageLoader } from "./PageLoader";
+
+// Every page is code-split so the initial bundle stays small — a customer
+// scanning a QR code only downloads the public menu, not the whole admin
+// dashboard, and staff only download the pages they actually visit.
+function lazyPage(loader: () => Promise<{ default: ComponentType }>) {
+  const LazyComponent = lazy(loader);
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <LazyComponent />
+    </Suspense>
+  );
+}
+
+const Login = () => lazyPage(() => import("../pages/auth/Login"));
+const ForgotPassword = () => lazyPage(() => import("../pages/auth/ForgotPassword"));
+const ResetPassword = () => lazyPage(() => import("../pages/auth/ResetPassword"));
+const Dashboard = () => lazyPage(() => import("../pages/dashboard/Dashboard"));
+const MenuList = () => lazyPage(() => import("../pages/menu/MenuList"));
+const Categories = () => lazyPage(() => import("../pages/menu/Categories"));
+const QRManagement = () => lazyPage(() => import("../pages/qr/QRManagement"));
+const POS = () => lazyPage(() => import("../pages/pos/POS"));
+const Orders = () => lazyPage(() => import("../pages/orders/Orders"));
+const Tables = () => lazyPage(() => import("../pages/tables/Tables"));
+const Inventory = () => lazyPage(() => import("../pages/inventory/Inventory"));
+const Customers = () => lazyPage(() => import("../pages/customers/Customers"));
+const Staff = () => lazyPage(() => import("../pages/staff/Staff"));
+const Reports = () => lazyPage(() => import("../pages/reports/Reports"));
+const SettingsPage = () => lazyPage(() => import("../pages/settings/Settings"));
+const PublicMenu = () => lazyPage(() => import("../pages/public/PublicMenu"));
+const NotFound = () => lazyPage(() => import("../pages/NotFound"));
 
 export const router = createBrowserRouter([
   {

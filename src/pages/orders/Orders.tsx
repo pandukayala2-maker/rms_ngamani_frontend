@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import { HiOutlinePrinter } from "react-icons/hi2";
+import { HiOutlinePrinter, HiOutlineSpeakerWave, HiOutlineSpeakerXMark } from "react-icons/hi2";
 import { Card } from "../../components/ui/Card";
 import { Select } from "../../components/ui/Input";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { DataTable } from "../../components/ui/DataTable";
 import { useOrders, useUpdateOrderStatus } from "../../hooks/useOrders";
+import { useOrderVoiceAlerts } from "../../hooks/useOrderVoiceAlerts";
 import { getErrorMessage } from "../../lib/axios";
 import { openReceipt } from "../../lib/receipt";
 import type { Order, OrderStatus } from "../../types";
@@ -31,8 +32,12 @@ const nextStatus: Partial<Record<OrderStatus, OrderStatus>> = {
 export default function Orders() {
   const [status, setStatus] = useState<string>("");
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useOrders({ status: status || undefined, page, limit: 15 });
+  const { data, isLoading } = useOrders(
+    { status: status || undefined, page, limit: 15 },
+    { refetchInterval: 20000 }
+  );
   const updateStatus = useUpdateOrderStatus();
+  const voiceAlerts = useOrderVoiceAlerts(data?.items);
 
   const columns = useMemo<ColumnDef<Order, any>[]>(
     () => [
@@ -85,7 +90,16 @@ export default function Orders() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          variant={voiceAlerts.enabled ? "primary" : "outline"}
+          size="sm"
+          onClick={voiceAlerts.toggle}
+          title="Announce new orders out loud"
+        >
+          {voiceAlerts.enabled ? <HiOutlineSpeakerWave size={16} /> : <HiOutlineSpeakerXMark size={16} />}
+          <span className="ml-1.5">Voice Alerts {voiceAlerts.enabled ? "On" : "Off"}</span>
+        </Button>
         <Select className="w-48" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="">All statuses</option>
           <option value="PENDING">Pending</option>

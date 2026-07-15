@@ -13,13 +13,14 @@ export interface CreateOrderInput {
   isHeld?: boolean;
 }
 
-export function useOrders(query: Record<string, unknown> = {}) {
+export function useOrders(query: Record<string, unknown> = {}, options: { refetchInterval?: number } = {}) {
   return useQuery({
     queryKey: ["orders", query],
     queryFn: async () => {
       const res = await api.get<ApiResponse<Order[]>>("/orders", { params: query });
       return { items: res.data.data, pagination: res.data.meta?.pagination as Pagination };
     },
+    refetchInterval: options.refetchInterval,
   });
 }
 
