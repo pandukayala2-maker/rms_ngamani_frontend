@@ -36,7 +36,7 @@ interface PublicCategory {
 
 interface PublicMenuData {
   restaurant: { name: string; logo: string | null; address: string | null; contact: string | null; currency: string };
-  table: { id: string; name: string; code: string } | null;
+  tables: { id: string; name: string; code: string }[];
   categories: PublicCategory[];
 }
 
@@ -74,6 +74,8 @@ export default function PublicMenu() {
   const [detailItem, setDetailItem] = useState<MenuItem | null>(null);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [orderType, setOrderType] = useState<"DINE_IN" | "TAKEAWAY">("TAKEAWAY");
+  const [tableId, setTableId] = useState("");
   const [confirmedOrder, setConfirmedOrder] = useState<{ orderNumber: string; total: number } | null>(null);
 
   const { data, isLoading, isError } = useQuery({
@@ -103,6 +105,8 @@ export default function PublicMenu() {
           items: Object.values(cart).map((line) => ({ menuItemId: line.item.id, quantity: line.quantity })),
           customerName: customerName || undefined,
           customerPhone: customerPhone || undefined,
+          orderType,
+          tableId: orderType === "DINE_IN" ? tableId || undefined : undefined,
         }
       );
       return res.data.data;
@@ -197,11 +201,6 @@ export default function PublicMenu() {
             </div>
             <h1 className="truncate text-xl font-bold tracking-tight">{data.restaurant.name}</h1>
           </div>
-          {data.table && (
-            <span className="shrink-0 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-amber-300">
-              {data.table.name}
-            </span>
-          )}
         </div>
       </div>
 
@@ -588,6 +587,40 @@ export default function PublicMenu() {
                     </span>
                   </div>
 
+                  <div className="flex gap-2 rounded-xl bg-neutral-800 p-1">
+                    <button
+                      onClick={() => setOrderType("TAKEAWAY")}
+                      className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${
+                        orderType === "TAKEAWAY" ? "bg-amber-500 text-neutral-950" : "text-neutral-400"
+                      }`}
+                    >
+                      Takeaway
+                    </button>
+                    <button
+                      onClick={() => setOrderType("DINE_IN")}
+                      className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-colors ${
+                        orderType === "DINE_IN" ? "bg-amber-500 text-neutral-950" : "text-neutral-400"
+                      }`}
+                    >
+                      Dine-in
+                    </button>
+                  </div>
+
+                  {orderType === "DINE_IN" && (
+                    <select
+                      value={tableId}
+                      onChange={(e) => setTableId(e.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-neutral-800 px-3 py-2.5 text-sm text-white focus:border-amber-500/50 focus:outline-none"
+                    >
+                      <option value="">Select your table</option>
+                      {data.tables.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
                   <div className="[&_input]:bg-neutral-800 [&_input]:border-white/10 [&_input]:text-white [&_span]:text-neutral-400">
                     <Input
                       label="Your name (optional)"
@@ -606,7 +639,7 @@ export default function PublicMenu() {
 
                   <button
                     onClick={() => placeOrder.mutate()}
-                    disabled={placeOrder.isPending}
+                    disabled={placeOrder.isPending || (orderType === "DINE_IN" && !tableId)}
                     className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-600 py-3 text-sm font-bold text-neutral-950 disabled:opacity-60"
                   >
                     {placeOrder.isPending ? "Placing order..." : "Place Order"}

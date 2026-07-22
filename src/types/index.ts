@@ -74,17 +74,14 @@ export interface RestaurantTable {
   name: string;
   capacity: number;
   status: TableStatus;
-  qrCode?: { id: string; token: string; isActive: boolean } | null;
 }
 
 export interface QRCodeEntity {
   id: string;
-  type: "BRANCH" | "TABLE";
   token: string;
   imageUrl: string | null;
   isActive: boolean;
   scanCount: number;
-  table?: { id: string; name: string; code: string } | null;
 }
 
 export type OrderType = "DINE_IN" | "TAKEAWAY" | "DELIVERY";
