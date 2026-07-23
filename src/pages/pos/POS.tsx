@@ -7,16 +7,20 @@ import {
   HiOutlineTrash,
   HiOutlineClock,
   HiOutlineQrCode,
+  HiOutlineBanknotes,
+  HiOutlineXMark,
 } from "react-icons/hi2";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input, Select } from "../../components/ui/Input";
+import { Modal } from "../../components/ui/Modal";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { SkeletonCards } from "../../components/ui/Skeleton";
 import { useCategories } from "../../hooks/useCategories";
 import { useMenuItems } from "../../hooks/useMenu";
 import { useTables } from "../../hooks/useTables";
 import { useCreateOrder } from "../../hooks/useOrders";
+import { useCurrentSession, useOpenSession } from "../../hooks/usePosSessions";
 import { useCartStore } from "../../store/cartStore";
 import { getErrorMessage } from "../../lib/axios";
 import { resolveAssetUrl } from "../../lib/assets";
@@ -32,6 +36,12 @@ export default function POS() {
   const [barcodeInput, setBarcodeInput] = useState("");
   const [heldOpen, setHeldOpen] = useState(false);
   const [pendingOrder, setPendingOrder] = useState<Order | null>(null);
+  const [openCounterModalOpen, setOpenCounterModalOpen] = useState(false);
+  const [openingCash, setOpeningCash] = useState("");
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  const { data: currentSession } = useCurrentSession();
+  const openSession = useOpenSession();
 
   const { data: categories } = useCategories();
   const { data: menuData, isLoading } = useMenuItems({
@@ -111,8 +121,39 @@ export default function POS() {
     );
   };
 
+  const handleOpenCounter = () => {
+    const amount = Number(openingCash);
+    if (Number.isNaN(amount) || amount < 0) return toast.error("Enter a valid opening cash amount");
+    openSession.mutate(amount, {
+      onSuccess: () => {
+        toast.success("Counter opened");
+        setOpenCounterModalOpen(false);
+        setOpeningCash("");
+      },
+      onError: (err) => toast.error(getErrorMessage(err)),
+    });
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_360px] gap-4 h-full">
+    <div className="flex h-full flex-col gap-4">
+      {!currentSession && !bannerDismissed && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400">
+          <div className="flex items-center gap-2">
+            <HiOutlineBanknotes size={16} />
+            <span>Your counter isn&apos;t open. Open it to track cash for this shift.</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => setOpenCounterModalOpen(true)}>
+              Open Counter
+            </Button>
+            <button onClick={() => setBannerDismissed(true)} className="p-1 text-amber-600 dark:text-amber-400" aria-label="Dismiss">
+              <HiOutlineXMark size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="grid flex-1 grid-cols-1 lg:grid-cols-[220px_1fr_360px] gap-4 min-h-0">
       {/* Category sidebar */}
       <Card className="p-3">
         <p className="mb-2 px-1 text-xs font-semibold uppercase text-[var(--text-muted)]">Categories</p>
@@ -282,6 +323,7 @@ export default function POS() {
           </Button>
         </div>
       </Card>
+      </div>
 
       <HeldBillsModal
         open={heldOpen}
@@ -293,6 +335,27 @@ export default function POS() {
       />
 
       <PaymentModal order={pendingOrder} onClose={() => setPendingOrder(null)} />
+
+      <Modal open={openCounterModalOpen} onClose={() => setOpenCounterModalOpen(false)} title="Open Counter" maxWidth="max-w-sm">
+        <div className="space-y-4">
+          <Input
+            label="Opening Cash"
+            type="number"
+            min={0}
+            value={openingCash}
+            onChange={(e) => setOpeningCash(e.target.value)}
+            placeholder="0"
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setOpenCounterModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleOpenCounter} isLoading={openSession.isPending}>
+              Open Counter
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -35,6 +35,7 @@ const Designations = () => lazyPage(() => import("../pages/roles/Designations"))
 const Shifts = () => lazyPage(() => import("../pages/roles/Shifts"));
 const RolePermissions = () => lazyPage(() => import("../pages/roles/RolePermissions"));
 const Reports = () => lazyPage(() => import("../pages/reports/Reports"));
+const PosReport = () => lazyPage(() => import("../pages/reports/PosReport"));
 const SettingsPage = () => lazyPage(() => import("../pages/settings/Settings"));
 const PublicMenu = () => lazyPage(() => import("../pages/public/PublicMenu"));
 const NotFound = () => lazyPage(() => import("../pages/NotFound"));
@@ -95,7 +96,10 @@ export const router = createBrowserRouter([
           {
             path: "/reports",
             element: <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]} />,
-            children: [{ index: true, element: <Reports /> }],
+            children: [
+              { index: true, element: <Reports /> },
+              { path: "pos", element: <PosReport /> },
+            ],
           },
           {
             path: "/settings",
