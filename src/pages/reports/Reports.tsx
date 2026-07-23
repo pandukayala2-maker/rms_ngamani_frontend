@@ -16,7 +16,16 @@ interface SalesReport {
 interface ProfitLoss {
   revenue: number;
   estimatedCost: number;
+  totalExpenses: number;
+  expensesByCategory: { category: string; total: number }[];
   profit: number;
+}
+
+interface BalanceSheet {
+  assets: { inventoryValue: number; cashOnHand: number; total: number };
+  liabilities: { unpaidPurchaseOrders: number; total: number };
+  equity: number;
+  note: string;
 }
 
 interface CashierReportRow {
@@ -44,12 +53,13 @@ function useReport<T>(path: string) {
 export default function Reports() {
   const { data: sales, isLoading: salesLoading } = useReport<SalesReport>("sales");
   const { data: pnl, isLoading: pnlLoading } = useReport<ProfitLoss>("profit-loss");
+  const { data: balanceSheet, isLoading: balanceSheetLoading } = useReport<BalanceSheet>("balance-sheet");
   const { data: cashiers, isLoading: cashiersLoading } = useReport<CashierReportRow[]>("cashier");
   const { data: products, isLoading: productsLoading } = useReport<ProductReportRow[]>("product");
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Sales Summary</CardTitle>
@@ -76,7 +86,29 @@ export default function Reports() {
             <div className="space-y-1 text-sm">
               <Row label="Revenue" value={currency.format(pnl.revenue)} />
               <Row label="Estimated Cost" value={currency.format(pnl.estimatedCost)} />
+              <Row label="Expenses" value={currency.format(pnl.totalExpenses)} />
+              {pnl.expensesByCategory.map((e) => (
+                <Row key={e.category} label={`  ${e.category}`} value={currency.format(e.total)} />
+              ))}
               <Row label="Profit" value={currency.format(pnl.profit)} bold />
+            </div>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Balance Sheet</CardTitle>
+          </CardHeader>
+          {balanceSheetLoading || !balanceSheet ? (
+            <Skeleton className="h-24 w-full" />
+          ) : (
+            <div className="space-y-1 text-sm">
+              <Row label="Inventory Value" value={currency.format(balanceSheet.assets.inventoryValue)} />
+              <Row label="Cash on Hand" value={currency.format(balanceSheet.assets.cashOnHand)} />
+              <Row label="Total Assets" value={currency.format(balanceSheet.assets.total)} bold />
+              <Row label="Unpaid Purchase Orders" value={currency.format(balanceSheet.liabilities.total)} />
+              <Row label="Equity" value={currency.format(balanceSheet.equity)} bold />
+              <p className="pt-1 text-xs text-[var(--text-muted)]">{balanceSheet.note}</p>
             </div>
           )}
         </Card>
