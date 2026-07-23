@@ -1,5 +1,29 @@
 export type Role = "ADMIN" | "MANAGER" | "CASHIER" | "CUSTOMER";
 
+export interface Department {
+  id: string;
+  name: string;
+}
+
+export interface Designation {
+  id: string;
+  name: string;
+  departmentId?: string | null;
+  department?: { id: string; name: string } | null;
+}
+
+export interface Shift {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface RolePermission {
+  role: Role;
+  allowedNavKeys: string[];
+}
+
 export interface User {
   id: string;
   name: string;
@@ -9,6 +33,13 @@ export interface User {
   avatar: string | null;
   phone: string | null;
   isActive: boolean;
+  employeeCode?: string | null;
+  departmentId?: string | null;
+  designationId?: string | null;
+  shiftId?: string | null;
+  department?: { id: string; name: string } | null;
+  designation?: { id: string; name: string } | null;
+  shift?: { id: string; name: string; startTime: string; endTime: string } | null;
 }
 
 export interface Category {

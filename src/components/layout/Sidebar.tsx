@@ -13,16 +13,19 @@ import {
   HiOutlineChartBar,
   HiOutlineCog6Tooth,
   HiOutlineSparkles,
+  HiOutlineBanknotes,
+  HiOutlineDocumentChartBar,
 } from "react-icons/hi2";
 import { useAuthStore } from "../../store/authStore";
 import { useSettings } from "../../hooks/useSettings";
-import type { Role } from "../../types";
+import { useMyPermissions } from "../../hooks/usePermissions";
+import type { NavKey } from "../../config/navKeys";
 
 interface NavItem {
   to: string;
   label: string;
   icon: React.ReactNode;
-  roles: Role[];
+  navKey: NavKey;
 }
 
 interface NavSection {
@@ -33,39 +36,45 @@ interface NavSection {
 const navSections: NavSection[] = [
   {
     label: "Overview",
-    items: [{ to: "/", label: "Dashboard", icon: <HiOutlineSquares2X2 size={18} />, roles: ["ADMIN", "MANAGER"] }],
+    items: [{ to: "/", label: "Dashboard", icon: <HiOutlineSquares2X2 size={18} />, navKey: "dashboard" }],
   },
   {
     label: "Operations",
     items: [
-      { to: "/pos", label: "POS Counter", icon: <HiOutlineShoppingCart size={18} />, roles: ["ADMIN", "MANAGER", "CASHIER"] },
-      { to: "/orders", label: "Orders", icon: <HiOutlineClipboardDocumentList size={18} />, roles: ["ADMIN", "MANAGER", "CASHIER"] },
-      { to: "/tables", label: "Tables", icon: <HiOutlineTableCells size={18} />, roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { to: "/pos", label: "POS Counter", icon: <HiOutlineShoppingCart size={18} />, navKey: "pos" },
+      { to: "/orders", label: "Orders", icon: <HiOutlineClipboardDocumentList size={18} />, navKey: "orders" },
+      { to: "/tables", label: "Tables", icon: <HiOutlineTableCells size={18} />, navKey: "tables" },
     ],
   },
   {
     label: "Catalog",
     items: [
-      { to: "/menu", label: "Menu Management", icon: <HiOutlineSparkles size={18} />, roles: ["ADMIN", "MANAGER"] },
-      { to: "/qr-codes", label: "QR Menu", icon: <HiOutlineQrCode size={18} />, roles: ["ADMIN", "MANAGER"] },
-      { to: "/inventory", label: "Inventory", icon: <HiOutlineArchiveBox size={18} />, roles: ["ADMIN", "MANAGER"] },
+      { to: "/menu", label: "Menu Management", icon: <HiOutlineSparkles size={18} />, navKey: "menu" },
+      { to: "/qr-codes", label: "QR Menu", icon: <HiOutlineQrCode size={18} />, navKey: "qr" },
+      { to: "/inventory", label: "Inventory", icon: <HiOutlineArchiveBox size={18} />, navKey: "inventory" },
     ],
   },
   {
     label: "People & Insights",
     items: [
-      { to: "/customers", label: "Customers", icon: <HiOutlineUserGroup size={18} />, roles: ["ADMIN", "MANAGER", "CASHIER"] },
-      { to: "/staff", label: "Staff", icon: <HiOutlineUsers size={18} />, roles: ["ADMIN"] },
-      { to: "/reports", label: "Reports", icon: <HiOutlineChartBar size={18} />, roles: ["ADMIN", "MANAGER"] },
-      { to: "/settings", label: "Settings", icon: <HiOutlineCog6Tooth size={18} />, roles: ["ADMIN"] },
+      { to: "/customers", label: "Customers", icon: <HiOutlineUserGroup size={18} />, navKey: "customers" },
+      { to: "/roles", label: "Role Management", icon: <HiOutlineUsers size={18} />, navKey: "role-management" },
+      { to: "/reports", label: "Reports", icon: <HiOutlineChartBar size={18} />, navKey: "reports" },
+      { to: "/reports/pos", label: "POS Report", icon: <HiOutlineDocumentChartBar size={18} />, navKey: "pos-report" },
+      { to: "/expenses", label: "Expenses", icon: <HiOutlineBanknotes size={18} />, navKey: "expenses" },
+      { to: "/settings", label: "Settings", icon: <HiOutlineCog6Tooth size={18} />, navKey: "settings" },
     ],
   },
 ];
 
 export function Sidebar() {
   const user = useAuthStore((s) => s.user);
-  const role = user?.role;
   const { data: settings } = useSettings();
+  const { data: myPermissions } = useMyPermissions();
+
+  const isAdmin = user?.role === "ADMIN";
+  const allowedNavKeys = myPermissions?.allowedNavKeys ?? [];
+  const canSee = (navKey: NavKey) => isAdmin || allowedNavKeys.includes(navKey);
 
   return (
     <aside className="hidden md:flex w-64 shrink-0 flex-col gap-1 border-r border-[var(--border-color)] bg-[var(--bg-surface)]/70 p-4 backdrop-blur-xl">
@@ -81,7 +90,7 @@ export function Sidebar() {
 
       <nav className="flex-1 space-y-5 overflow-y-auto scrollbar-thin">
         {navSections.map((section) => {
-          const items = section.items.filter((item) => !role || item.roles.includes(role));
+          const items = section.items.filter((item) => !user || canSee(item.navKey));
           if (items.length === 0) return null;
           return (
             <div key={section.label}>

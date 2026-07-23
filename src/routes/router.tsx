@@ -29,7 +29,11 @@ const Orders = () => lazyPage(() => import("../pages/orders/Orders"));
 const Tables = () => lazyPage(() => import("../pages/tables/Tables"));
 const Inventory = () => lazyPage(() => import("../pages/inventory/Inventory"));
 const Customers = () => lazyPage(() => import("../pages/customers/Customers"));
-const Staff = () => lazyPage(() => import("../pages/staff/Staff"));
+const Employees = () => lazyPage(() => import("../pages/roles/Employees"));
+const Departments = () => lazyPage(() => import("../pages/roles/Departments"));
+const Designations = () => lazyPage(() => import("../pages/roles/Designations"));
+const Shifts = () => lazyPage(() => import("../pages/roles/Shifts"));
+const RolePermissions = () => lazyPage(() => import("../pages/roles/RolePermissions"));
 const Reports = () => lazyPage(() => import("../pages/reports/Reports"));
 const SettingsPage = () => lazyPage(() => import("../pages/settings/Settings"));
 const PublicMenu = () => lazyPage(() => import("../pages/public/PublicMenu"));
@@ -78,9 +82,15 @@ export const router = createBrowserRouter([
           },
           { path: "/customers", element: <Customers /> },
           {
-            path: "/staff",
+            path: "/roles",
             element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
-            children: [{ index: true, element: <Staff /> }],
+            children: [
+              { index: true, element: <Employees /> },
+              { path: "departments", element: <Departments /> },
+              { path: "designations", element: <Designations /> },
+              { path: "shifts", element: <Shifts /> },
+              { path: "permissions", element: <RolePermissions /> },
+            ],
           },
           {
             path: "/reports",
