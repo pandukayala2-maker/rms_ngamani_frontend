@@ -27,7 +27,6 @@ import { api, getErrorMessage } from "../../lib/axios";
 import { resolveAssetUrl } from "../../lib/assets";
 import type { MenuItem, MenuItemStatus } from "../../types";
 import { MenuForm } from "./MenuForm";
-import { MenuTabs } from "./MenuTabs";
 
 const statusTone: Record<MenuItemStatus, "good" | "neutral" | "warning" | "critical"> = {
   ACTIVE: "good",
@@ -166,7 +165,6 @@ export default function MenuList() {
 
   return (
     <div className="space-y-4">
-      <MenuTabs />
       <div className="flex items-center justify-between gap-3 overflow-x-auto pb-1">
         <div className="flex shrink-0 items-center gap-2">
           <Input
