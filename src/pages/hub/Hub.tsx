@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import clsx from "clsx";
-import { HiOutlineLockClosed, HiArrowRight } from "react-icons/hi2";
+import { HiOutlineLockClosed } from "react-icons/hi2";
 import { MODULES } from "../../config/modules";
 import { useAuthStore } from "../../store/authStore";
 import { useMyPermissions } from "../../hooks/usePermissions";
@@ -14,54 +14,53 @@ export default function Hub() {
   const canEnter = (moduleNavKeys: string[]) => isAdmin || moduleNavKeys.some((k) => allowedNavKeys.includes(k));
 
   return (
-    <div className="flex min-h-full flex-col items-center justify-center gap-6 py-10">
-      <p className="text-sm text-[var(--text-muted)]">Choose a module to continue</p>
-
-      <div className="grid w-full max-w-6xl grid-cols-1 gap-5 px-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="flex min-h-full flex-col items-center justify-center gap-10 py-10">
+      <div className="grid w-full max-w-6xl grid-cols-1 gap-10 px-4 sm:grid-cols-2 lg:grid-cols-4">
         {MODULES.map((module) => {
           const enabled = canEnter(module.navKeys);
           const card = (
             <div
               className={clsx(
-                "group relative flex h-full flex-col gap-5 overflow-hidden rounded-2xl border p-6 transition-all duration-200",
-                enabled
-                  ? "border-[var(--border-color)] bg-[var(--bg-surface)] hover:-translate-y-1 hover:border-transparent hover:shadow-xl cursor-pointer"
-                  : "border-[var(--border-color)] bg-[var(--bg-surface)]/60 cursor-not-allowed opacity-50"
+                "group flex flex-col items-center gap-4 text-center transition-all duration-200",
+                enabled ? "cursor-pointer" : "cursor-not-allowed opacity-40"
               )}
             >
-              <div
-                className={clsx(
-                  "flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg transition-transform duration-200",
-                  enabled ? [module.accent, module.glow, "text-white group-hover:scale-105"] : "from-[var(--bg-surface-2)] to-[var(--bg-surface-2)] text-[var(--text-muted)]"
+              <div className="relative flex h-28 w-28 items-center justify-center">
+                {enabled && (
+                  <div
+                    className={clsx(
+                      "absolute inset-0 rounded-full opacity-30 blur-2xl transition-opacity duration-200 group-hover:opacity-50",
+                      module.glowBg
+                    )}
+                  />
                 )}
-              >
-                {enabled ? module.icon : <HiOutlineLockClosed size={24} />}
-              </div>
-
-              <div className="flex-1">
-                <p className="text-base font-semibold">{module.label}</p>
-                <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">{module.description}</p>
-              </div>
-
-              {enabled && (
-                <div className="flex items-center gap-1 text-xs font-medium text-[var(--text-muted)] transition-colors group-hover:text-brand-600">
-                  Enter <HiArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
-                </div>
-              )}
-
-              {enabled && (
                 <div
                   className={clsx(
-                    "pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-0 transition-opacity duration-200 group-hover:opacity-100",
-                    module.accent
+                    "relative flex h-24 w-24 items-center justify-center rounded-full border bg-[var(--bg-surface)]/40 backdrop-blur-sm transition-transform duration-200",
+                    enabled ? [module.ring, "group-hover:scale-105"] : "border-[var(--border-color)]"
                   )}
-                />
+                >
+                  {enabled ? (
+                    <span className={clsx(module.iconColor, module.iconGlow)}>{module.icon}</span>
+                  ) : (
+                    <HiOutlineLockClosed size={32} className="text-[var(--text-muted)]" />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-base font-semibold">{module.label}</p>
+                <p className="mt-1 max-w-[13rem] text-xs leading-relaxed text-[var(--text-muted)]">{module.description}</p>
+              </div>
+
+              {enabled && (
+                <div className={clsx("h-0.5 w-14 rounded-full bg-gradient-to-r", module.accent)} />
               )}
             </div>
           );
 
           return enabled ? (
-            <Link key={module.key} to={module.path} className="block h-full">
+            <Link key={module.key} to={module.path}>
               {card}
             </Link>
           ) : (
