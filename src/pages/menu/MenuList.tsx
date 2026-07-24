@@ -62,6 +62,11 @@ export default function MenuList() {
             )}
             <div className="min-w-0">
               <p className="truncate font-medium">{row.original.name}</p>
+              {row.original.nameArabic && (
+                <p className="truncate text-xs text-[var(--text-secondary)]" dir="rtl">
+                  {row.original.nameArabic}
+                </p>
+              )}
               <p className="text-xs text-[var(--text-muted)]">{row.original.itemCode}</p>
             </div>
           </div>

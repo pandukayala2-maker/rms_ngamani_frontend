@@ -81,6 +81,7 @@ export type SpicyLevel = "NONE" | "MILD" | "MEDIUM" | "HOT" | "EXTRA_HOT";
 export interface MenuItem {
   id: string;
   name: string;
+  nameArabic?: string | null;
   itemCode: string;
   categoryId: string;
   category?: { id: string; name: string };

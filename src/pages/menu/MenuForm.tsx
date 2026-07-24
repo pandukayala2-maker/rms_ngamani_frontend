@@ -13,6 +13,7 @@ import type { Category, MenuItem } from "../../types";
 
 const schema = z.object({
   name: z.string().min(1, "Required"),
+  nameArabic: z.string().optional(),
   itemCode: z.string().min(1, "Required"),
   categoryId: z.string().uuid("Select a category"),
   subcategory: z.string().optional(),
@@ -66,6 +67,7 @@ export function MenuForm({ open, onClose, item, categories }: MenuFormProps) {
         item
           ? {
               ...item,
+              nameArabic: item.nameArabic ?? undefined,
               discountPrice: item.discountPrice ?? undefined,
               subcategory: item.subcategory ?? undefined,
               description: item.description ?? undefined,
@@ -134,11 +136,12 @@ export function MenuForm({ open, onClose, item, categories }: MenuFormProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Input label="Item Name" error={errors.name?.message} {...register("name")} />
-          <Input label="Item Code" error={errors.itemCode?.message} {...register("itemCode")} />
+          <Input label="Item Name (English)" error={errors.name?.message} {...register("name")} />
+          <Input label="Item Name (Arabic)" dir="rtl" {...register("nameArabic")} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
+          <Input label="Item Code" error={errors.itemCode?.message} {...register("itemCode")} />
           <Select label="Category" error={errors.categoryId?.message} {...register("categoryId")}>
             <option value="">Select category</option>
             {categories.map((c) => (
