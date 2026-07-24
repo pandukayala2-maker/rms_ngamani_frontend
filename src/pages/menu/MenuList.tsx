@@ -25,6 +25,7 @@ import {
 import { useCategories } from "../../hooks/useCategories";
 import { api, getErrorMessage } from "../../lib/axios";
 import { resolveAssetUrl } from "../../lib/assets";
+import { categoryIcon } from "../../lib/categoryIcon";
 import type { MenuItem, MenuItemStatus } from "../../types";
 import { MenuForm } from "./MenuForm";
 
@@ -53,12 +54,16 @@ export default function MenuList() {
       {
         header: "Item",
         accessorKey: "name",
-        cell: ({ row }) => (
+        cell: ({ row }) => {
+          const Icon = categoryIcon(row.original.category?.name ?? row.original.name);
+          return (
           <div className="flex items-center gap-3">
             {row.original.image ? (
               <img src={resolveAssetUrl(row.original.image)} alt="" className="h-9 w-9 rounded-lg object-cover" />
             ) : (
-              <div className="h-9 w-9 shrink-0 rounded-lg bg-[var(--bg-surface-2)]" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 text-white">
+                <Icon size={16} />
+              </div>
             )}
             <div className="min-w-0">
               <p className="truncate font-medium">{row.original.name}</p>
@@ -70,7 +75,8 @@ export default function MenuList() {
               <p className="text-xs text-[var(--text-muted)]">{row.original.itemCode}</p>
             </div>
           </div>
-        ),
+          );
+        },
       },
       { header: "Category", accessorFn: (row) => row.category?.name ?? "-" },
       {

@@ -1,17 +1,8 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  HiOutlinePencil,
-  HiOutlinePlus,
-  HiOutlineTrash,
-  HiOutlineSun,
-  HiOutlineMoon,
-  HiOutlineCake,
-  HiOutlineBeaker,
-  HiOutlineFire,
-  HiOutlineRectangleStack,
-} from "react-icons/hi2";
+import { HiOutlinePencil, HiOutlinePlus, HiOutlineTrash } from "react-icons/hi2";
+import { categoryIcon } from "../../lib/categoryIcon";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -35,16 +26,6 @@ interface FormValues {
   name: string;
   description?: string;
   displayOrder: number;
-}
-
-function categoryIcon(name: string) {
-  const n = name.toLowerCase();
-  if (n.includes("breakfast") || n.includes("tiffin")) return HiOutlineSun;
-  if (n.includes("dinner")) return HiOutlineMoon;
-  if (n.includes("dessert")) return HiOutlineCake;
-  if (n.includes("beverage") || n.includes("coffee") || n.includes("tea") || n.includes("juice")) return HiOutlineBeaker;
-  if (n.includes("fire") || n.includes("starter") || n.includes("fast")) return HiOutlineFire;
-  return HiOutlineRectangleStack;
 }
 
 export default function Categories() {

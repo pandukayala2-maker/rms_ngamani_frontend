@@ -11,11 +11,6 @@ import {
   HiOutlinePlus,
   HiOutlineMinus,
   HiOutlineTrash,
-  HiOutlineSun,
-  HiOutlineMoon,
-  HiOutlineCake,
-  HiOutlineBeaker,
-  HiOutlineRectangleStack,
   HiOutlineSquares2X2,
   HiOutlineBars3,
   HiOutlineXMark,
@@ -23,6 +18,7 @@ import {
 } from "react-icons/hi2";
 import { api, getErrorMessage } from "../../lib/axios";
 import { resolveAssetUrl } from "../../lib/assets";
+import { categoryIcon } from "../../lib/categoryIcon";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
@@ -52,16 +48,6 @@ const spicyDots: Record<string, number> = { NONE: 0, MILD: 1, MEDIUM: 2, HOT: 3,
 const currencySymbols: Record<string, string> = { INR: "₹", USD: "$", EUR: "€", GBP: "£", KWD: "KD " };
 function currencyLabel(code: string) {
   return currencySymbols[code] ?? `${code} `;
-}
-
-function categoryIcon(name: string) {
-  const n = name.toLowerCase();
-  if (n.includes("breakfast") || n.includes("tiffin")) return HiOutlineSun;
-  if (n.includes("dinner")) return HiOutlineMoon;
-  if (n.includes("dessert")) return HiOutlineCake;
-  if (n.includes("beverage") || n.includes("coffee") || n.includes("tea") || n.includes("juice")) return HiOutlineBeaker;
-  if (n.includes("fire") || n.includes("starter") || n.includes("fast")) return HiOutlineFire;
-  return HiOutlineRectangleStack;
 }
 
 export default function PublicMenu() {
@@ -214,7 +200,12 @@ export default function PublicMenu() {
             {heroSpecial.image ? (
               <img src={resolveAssetUrl(heroSpecial.image)} alt="" className="h-44 w-full object-cover" />
             ) : (
-              <div className="h-44 w-full bg-neutral-800" />
+              <div className="flex h-44 w-full items-center justify-center bg-neutral-800 text-neutral-500">
+                {(() => {
+                  const Icon = categoryIcon(heroSpecial.name);
+                  return <Icon size={36} />;
+                })()}
+              </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
             <div className="absolute left-4 top-4 rounded-full bg-amber-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-neutral-950">
@@ -296,7 +287,9 @@ export default function PublicMenu() {
 
         {viewMode === "grid" ? (
           <div className="grid grid-cols-2 gap-3">
-            {currentItems.map((item, i) => (
+            {currentItems.map((item, i) => {
+              const Icon = categoryIcon(item.name);
+              return (
               <motion.button
                 key={item.id}
                 initial={{ opacity: 0, y: 8 }}
@@ -308,7 +301,9 @@ export default function PublicMenu() {
                 {item.image ? (
                   <img src={resolveAssetUrl(item.image)} alt="" className="h-28 w-full object-cover" />
                 ) : (
-                  <div className="h-28 w-full bg-neutral-800" />
+                  <div className="flex h-28 w-full items-center justify-center bg-neutral-800 text-neutral-500">
+                    <Icon size={28} />
+                  </div>
                 )}
                 <div className="p-2.5">
                   <p className="truncate text-xs font-medium">{item.name}</p>
@@ -327,12 +322,14 @@ export default function PublicMenu() {
                   <HiOutlinePlus size={14} />
                 </button>
               </motion.button>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="space-y-3">
             {currentItems.map((item, i) => {
               const inCart = cart[item.id];
+              const Icon = categoryIcon(item.name);
               return (
                 <motion.div
                   key={item.id}
@@ -345,7 +342,9 @@ export default function PublicMenu() {
                     {item.image ? (
                       <img src={resolveAssetUrl(item.image)} alt="" className="h-20 w-20 rounded-xl object-cover" />
                     ) : (
-                      <div className="h-20 w-20 rounded-xl bg-neutral-800" />
+                      <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-neutral-800 text-neutral-500">
+                        <Icon size={24} />
+                      </div>
                     )}
                   </button>
                   <div className="min-w-0 flex-1">
@@ -419,7 +418,12 @@ export default function PublicMenu() {
                   {detailItem.image ? (
                     <img src={resolveAssetUrl(detailItem.image)} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <div className="h-full w-full bg-neutral-800" />
+                    <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-neutral-500">
+                      {(() => {
+                        const Icon = categoryIcon(detailItem.name);
+                        return <Icon size={40} />;
+                      })()}
+                    </div>
                   )}
                 </div>
 
