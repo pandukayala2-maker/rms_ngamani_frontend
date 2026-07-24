@@ -5,20 +5,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Warm amber/orange identity for Nagami Hotel, used across the whole
-        // app (admin dashboard, auth pages, QR menu) instead of the earlier
-        // generic blue.
+        // Gold identity matching the Nagami "Good Food | Good Mood" logo,
+        // used across the whole app (admin dashboard, auth pages, QR menu).
         brand: {
-          50: "#fff7ed",
-          100: "#ffedd5",
-          200: "#fed7aa",
-          300: "#fdba74",
-          400: "#fb923c",
-          500: "#f97316",
-          600: "#ea580c",
-          700: "#c2410c",
-          800: "#9a3412",
-          900: "#7c2d12",
+          50: "#fefaf0",
+          100: "#fdf3d9",
+          200: "#f9e4ab",
+          300: "#f3cd6e",
+          400: "#e9b53e",
+          500: "#d4a017",
+          600: "#b0830f",
+          700: "#8c670e",
+          800: "#6f5310",
+          900: "#5c4512",
         },
       },
       boxShadow: {

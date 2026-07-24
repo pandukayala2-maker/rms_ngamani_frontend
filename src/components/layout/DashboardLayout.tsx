@@ -4,31 +4,41 @@ import { Topbar } from "./Topbar";
 import { motion, AnimatePresence } from "framer-motion";
 
 const titles: Record<string, string> = {
-  "/": "Dashboard",
+  "/": "Modules",
+  "/admin": "Dashboard",
+  "/admin/branches": "Branches",
+  "/admin/shifts": "Shift Slot",
+  "/admin/departments": "Department",
+  "/admin/designations": "Designation",
+  "/admin/employees": "Employee",
+  "/admin/role-management": "Role Management",
+  "/admin/inventory": "Inventory",
+  "/admin/settings": "Settings",
   "/pos": "POS Counter",
-  "/orders": "Orders",
-  "/menu": "Menu Management",
-  "/qr-codes": "QR Menu Management",
-  "/tables": "Tables",
-  "/inventory": "Inventory",
-  "/customers": "Customers",
-  "/roles": "Role Management",
-  "/reports": "Reports & Analytics",
-  "/reports/pos": "POS Report",
-  "/expenses": "Expenses",
-  "/settings": "Settings",
+  "/menu": "Menu Items",
+  "/menu/categories": "Category",
+  "/menu/qr": "QR Screen",
+  "/accounts": "POS Reports",
+  "/accounts/orders": "Orders",
+  "/accounts/profit-loss": "Profit & Loss",
+  "/accounts/balance-sheet": "Balance Sheet",
+  "/accounts/expenses": "Expenses",
+  "/accounts/customers": "Customers",
+  "/accounts/tables": "Tables",
+  "/accounts/chart-of-accounts": "Chart of Accounts",
 };
 
 export function DashboardLayout() {
   const location = useLocation();
+  const isHub = location.pathname === "/";
   const title =
     titles[location.pathname] ??
     titles[`/${location.pathname.split("/")[1]}`] ??
-    "QR Menu POS";
+    "Nagami Restaurant";
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-page)]">
-      <Sidebar />
+      {!isHub && <Sidebar />}
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar title={title} />
         <main className="flex-1 overflow-y-auto scrollbar-thin p-6">

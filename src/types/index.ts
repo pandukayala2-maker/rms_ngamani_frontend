@@ -1,5 +1,16 @@
 export type Role = "ADMIN" | "MANAGER" | "CASHIER" | "CUSTOMER";
 
+export interface Branch {
+  id: string;
+  name: string;
+  address?: string | null;
+  contact?: string | null;
+  gstVat?: string | null;
+  currency: string;
+  language: string;
+  isActive: boolean;
+}
+
 export interface Department {
   id: string;
   name: string;
@@ -22,6 +33,18 @@ export interface Shift {
 export interface RolePermission {
   role: Role;
   allowedNavKeys: string[];
+}
+
+export type AccountType = "ASSET" | "LIABILITY" | "EQUITY" | "REVENUE" | "EXPENSE";
+
+export interface Account {
+  id: string;
+  name: string;
+  code?: string | null;
+  type: AccountType;
+  parentId?: string | null;
+  parent?: { id: string; name: string } | null;
+  isActive: boolean;
 }
 
 export interface User {

@@ -20,7 +20,9 @@ function lazyPage(loader: () => Promise<{ default: ComponentType }>) {
 const Login = () => lazyPage(() => import("../pages/auth/Login"));
 const ForgotPassword = () => lazyPage(() => import("../pages/auth/ForgotPassword"));
 const ResetPassword = () => lazyPage(() => import("../pages/auth/ResetPassword"));
+const Hub = () => lazyPage(() => import("../pages/hub/Hub"));
 const Dashboard = () => lazyPage(() => import("../pages/dashboard/Dashboard"));
+const Branches = () => lazyPage(() => import("../pages/admin/Branches"));
 const MenuList = () => lazyPage(() => import("../pages/menu/MenuList"));
 const Categories = () => lazyPage(() => import("../pages/menu/Categories"));
 const QRManagement = () => lazyPage(() => import("../pages/qr/QRManagement"));
@@ -34,8 +36,10 @@ const Departments = () => lazyPage(() => import("../pages/roles/Departments"));
 const Designations = () => lazyPage(() => import("../pages/roles/Designations"));
 const Shifts = () => lazyPage(() => import("../pages/roles/Shifts"));
 const RolePermissions = () => lazyPage(() => import("../pages/roles/RolePermissions"));
-const Reports = () => lazyPage(() => import("../pages/reports/Reports"));
 const PosReport = () => lazyPage(() => import("../pages/reports/PosReport"));
+const ProfitLoss = () => lazyPage(() => import("../pages/accounts/ProfitLoss"));
+const BalanceSheet = () => lazyPage(() => import("../pages/accounts/BalanceSheet"));
+const ChartOfAccounts = () => lazyPage(() => import("../pages/accounts/ChartOfAccounts"));
 const Expenses = () => lazyPage(() => import("../pages/expenses/Expenses"));
 const SettingsPage = () => lazyPage(() => import("../pages/settings/Settings"));
 const PublicMenu = () => lazyPage(() => import("../pages/public/PublicMenu"));
@@ -60,57 +64,58 @@ export const router = createBrowserRouter([
       {
         element: <DashboardLayout />,
         children: [
-          { path: "/", element: <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]} />, children: [{ index: true, element: <Dashboard /> }] },
+          { path: "/", element: <Hub /> },
+          {
+            path: "/admin",
+            children: [
+              {
+                element: <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]} />,
+                children: [
+                  { index: true, element: <Dashboard /> },
+                  { path: "inventory", element: <Inventory /> },
+                ],
+              },
+              {
+                element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
+                children: [
+                  { path: "branches", element: <Branches /> },
+                  { path: "shifts", element: <Shifts /> },
+                  { path: "departments", element: <Departments /> },
+                  { path: "designations", element: <Designations /> },
+                  { path: "employees", element: <Employees /> },
+                  { path: "role-management", element: <RolePermissions /> },
+                  { path: "settings", element: <SettingsPage /> },
+                ],
+              },
+            ],
+          },
           { path: "/pos", element: <POS /> },
-          { path: "/orders", element: <Orders /> },
           {
             path: "/menu",
             element: <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]} />,
             children: [
               { index: true, element: <MenuList /> },
               { path: "categories", element: <Categories /> },
+              { path: "qr", element: <QRManagement /> },
             ],
           },
           {
-            path: "/qr-codes",
-            element: <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]} />,
-            children: [{ index: true, element: <QRManagement /> }],
-          },
-          { path: "/tables", element: <Tables /> },
-          {
-            path: "/inventory",
-            element: <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]} />,
-            children: [{ index: true, element: <Inventory /> }],
-          },
-          { path: "/customers", element: <Customers /> },
-          {
-            path: "/roles",
-            element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
+            path: "/accounts",
             children: [
-              { index: true, element: <Employees /> },
-              { path: "departments", element: <Departments /> },
-              { path: "designations", element: <Designations /> },
-              { path: "shifts", element: <Shifts /> },
-              { path: "permissions", element: <RolePermissions /> },
+              {
+                element: <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]} />,
+                children: [
+                  { index: true, element: <PosReport /> },
+                  { path: "profit-loss", element: <ProfitLoss /> },
+                  { path: "balance-sheet", element: <BalanceSheet /> },
+                  { path: "expenses", element: <Expenses /> },
+                  { path: "chart-of-accounts", element: <ChartOfAccounts /> },
+                ],
+              },
+              { path: "orders", element: <Orders /> },
+              { path: "tables", element: <Tables /> },
+              { path: "customers", element: <Customers /> },
             ],
-          },
-          {
-            path: "/reports",
-            element: <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]} />,
-            children: [
-              { index: true, element: <Reports /> },
-              { path: "pos", element: <PosReport /> },
-            ],
-          },
-          {
-            path: "/expenses",
-            element: <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]} />,
-            children: [{ index: true, element: <Expenses /> }],
-          },
-          {
-            path: "/settings",
-            element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
-            children: [{ index: true, element: <SettingsPage /> }],
           },
         ],
       },

@@ -8,6 +8,7 @@ export interface Expense {
   amount: number;
   date: string;
   notes?: string | null;
+  accountId?: string | null;
 }
 
 export function useExpenses() {
@@ -23,7 +24,7 @@ export function useExpenses() {
 export function useCreateExpense() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { category: string; amount: number; date: string; notes?: string }) => {
+    mutationFn: async (input: { category: string; amount: number; date: string; notes?: string; accountId?: string }) => {
       const res = await api.post<ApiResponse<Expense>>("/expenses", input);
       return res.data.data;
     },

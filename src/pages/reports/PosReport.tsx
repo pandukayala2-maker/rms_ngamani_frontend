@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Card, CardHeader, CardTitle } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
@@ -6,11 +7,46 @@ import { DataTable } from "../../components/ui/DataTable";
 import { Modal } from "../../components/ui/Modal";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { useSessionHistory, useSessionReport, type PosSession } from "../../hooks/usePosSessions";
+import { api } from "../../lib/axios";
+import type { ApiResponse } from "../../types";
 
 const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 const dateTime = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" });
 
+interface SalesReport {
+  orderCount: number;
+  totalSales: number;
+  totalTax: number;
+  totalDiscount: number;
+}
+
+interface CashierReportRow {
+  cashier: string;
+  orders: number;
+  total: number;
+}
+
+interface ProductReportRow {
+  name: string;
+  quantitySold: number;
+  revenue: number;
+}
+
+function useBusinessReport<T>(path: string) {
+  return useQuery({
+    queryKey: ["reports", path],
+    queryFn: async () => {
+      const res = await api.get<ApiResponse<T>>(`/reports/${path}`);
+      return res.data.data;
+    },
+  });
+}
+
 export default function PosReport() {
+  const { data: sales, isLoading: salesLoading } = useBusinessReport<SalesReport>("sales");
+  const { data: cashiers, isLoading: cashiersLoading } = useBusinessReport<CashierReportRow[]>("cashier");
+  const { data: products, isLoading: productsLoading } = useBusinessReport<ProductReportRow[]>("product");
+
   const { data: sessions, isLoading } = useSessionHistory();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { data: report, isLoading: reportLoading } = useSessionReport(selectedId);
@@ -58,6 +94,58 @@ export default function PosReport() {
 
   return (
     <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Sales Summary</CardTitle>
+          </CardHeader>
+          {salesLoading || !sales ? (
+            <Skeleton className="h-24 w-full" />
+          ) : (
+            <div className="space-y-1 text-sm">
+              <Row label="Orders" value={String(sales.orderCount)} />
+              <Row label="Total Sales" value={currency.format(sales.totalSales)} />
+              <Row label="Total Tax" value={currency.format(sales.totalTax)} />
+              <Row label="Total Discount" value={currency.format(sales.totalDiscount)} />
+            </div>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Cashier Report</CardTitle>
+          </CardHeader>
+          {cashiersLoading || !cashiers ? (
+            <Skeleton className="h-24 w-full" />
+          ) : cashiers.length === 0 ? (
+            <p className="text-sm text-[var(--text-muted)]">No completed orders yet</p>
+          ) : (
+            <div className="space-y-1 text-sm">
+              {cashiers.map((c) => (
+                <Row key={c.cashier} label={`${c.cashier} (${c.orders})`} value={currency.format(c.total)} />
+              ))}
+            </div>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Product Performance</CardTitle>
+          </CardHeader>
+          {productsLoading || !products ? (
+            <Skeleton className="h-24 w-full" />
+          ) : products.length === 0 ? (
+            <p className="text-sm text-[var(--text-muted)]">No completed sales yet</p>
+          ) : (
+            <div className="max-h-48 space-y-1 overflow-y-auto scrollbar-thin text-sm">
+              {products.map((p) => (
+                <Row key={p.name} label={`${p.name} (${p.quantitySold})`} value={currency.format(p.revenue)} />
+              ))}
+            </div>
+          )}
+        </Card>
+      </div>
+
       <Card>
         <DataTable columns={columns} data={sessions ?? []} isLoading={isLoading} emptyTitle="No counter sessions yet" />
       </Card>

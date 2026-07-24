@@ -1,35 +1,53 @@
 // Canonical sidebar/route access keys. Keep in sync with
-// backend/src/config/navKeys.ts.
+// backend/src/config/navKeys.ts and frontend/src/config/modules.ts.
 export const NAV_KEYS = [
+  // Admin module
   "dashboard",
+  "branches",
+  "shifts",
+  "departments",
+  "designations",
+  "employees",
+  "role-management",
+  "inventory",
+  "settings",
+  // POS Counter module
   "pos",
-  "orders",
-  "tables",
+  // Menu module
   "menu",
   "qr",
-  "inventory",
-  "customers",
-  "role-management",
-  "reports",
+  // Accounts & Reports module
   "pos-report",
+  "orders",
+  "profit-loss",
+  "balance-sheet",
   "expenses",
-  "settings",
+  "customers",
+  "tables",
+  "chart-of-accounts",
 ] as const;
 
 export type NavKey = (typeof NAV_KEYS)[number];
 
 export const NAV_KEY_LABELS: Record<NavKey, string> = {
   dashboard: "Dashboard",
-  pos: "POS Counter",
-  orders: "Orders",
-  tables: "Tables",
-  menu: "Menu Management",
-  qr: "QR Menu",
-  inventory: "Inventory",
-  customers: "Customers",
+  branches: "Branches",
+  shifts: "Shift Slot",
+  departments: "Department",
+  designations: "Designation",
+  employees: "Employee",
   "role-management": "Role Management",
-  reports: "Reports",
-  "pos-report": "POS Report",
-  expenses: "Expenses",
+  inventory: "Inventory",
   settings: "Settings",
+  pos: "POS Counter",
+  menu: "Menu Items",
+  qr: "QR Screen",
+  "pos-report": "POS Reports",
+  orders: "Orders",
+  "profit-loss": "Profit & Loss",
+  "balance-sheet": "Balance Sheet",
+  expenses: "Expenses",
+  customers: "Customers",
+  tables: "Tables",
+  "chart-of-accounts": "Chart of Accounts",
 };

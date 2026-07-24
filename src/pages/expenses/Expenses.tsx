@@ -5,11 +5,12 @@ import { toast } from "sonner";
 import { HiOutlinePencil, HiOutlinePlus, HiOutlineTrash } from "react-icons/hi2";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
-import { Input, Textarea } from "../../components/ui/Input";
+import { Input, Select, Textarea } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { DataTable } from "../../components/ui/DataTable";
 import { useCreateExpense, useDeleteExpense, useExpenses, useUpdateExpense, type Expense } from "../../hooks/useExpenses";
+import { useAccounts } from "../../hooks/useAccounts";
 import { getErrorMessage } from "../../lib/axios";
 
 const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
@@ -20,10 +21,12 @@ interface FormValues {
   amount: number;
   date: string;
   notes?: string;
+  accountId?: string;
 }
 
 export default function Expenses() {
   const { data: expenses, isLoading } = useExpenses();
+  const { data: accounts } = useAccounts();
   const createExpense = useCreateExpense();
   const updateExpense = useUpdateExpense();
   const deleteExpense = useDeleteExpense();
@@ -37,15 +40,22 @@ export default function Expenses() {
     if (modalOpen) {
       reset(
         editing
-          ? { category: editing.category, amount: editing.amount, date: editing.date.slice(0, 10), notes: editing.notes ?? "" }
-          : { category: "", amount: 0, date: new Date().toISOString().slice(0, 10), notes: "" }
+          ? {
+              category: editing.category,
+              amount: editing.amount,
+              date: editing.date.slice(0, 10),
+              notes: editing.notes ?? "",
+              accountId: editing.accountId ?? "",
+            }
+          : { category: "", amount: 0, date: new Date().toISOString().slice(0, 10), notes: "", accountId: "" }
       );
     }
   }, [modalOpen, editing, reset]);
 
   const onSubmit = handleSubmit((values) => {
+    const payload = { ...values, accountId: values.accountId || undefined };
     const mutation = editing ? updateExpense : createExpense;
-    mutation.mutate(editing ? { id: editing.id, ...values } : (values as never), {
+    mutation.mutate(editing ? { id: editing.id, ...payload } : (payload as never), {
       onSuccess: () => {
         toast.success(editing ? "Expense updated" : "Expense recorded");
         setModalOpen(false);
@@ -108,6 +118,14 @@ export default function Expenses() {
           <Input label="Category" placeholder="Rent, Utilities, Salaries..." {...register("category", { required: true })} />
           <Input label="Amount" type="number" min={0} step="0.01" {...register("amount", { required: true, min: 0 })} />
           <Input label="Date" type="date" {...register("date", { required: true })} />
+          <Select label="Account (optional)" {...register("accountId")}>
+            <option value="">None</option>
+            {accounts?.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+          </Select>
           <Textarea label="Notes (optional)" {...register("notes")} />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
