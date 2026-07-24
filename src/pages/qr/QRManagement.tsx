@@ -175,7 +175,7 @@ export default function QRManagement() {
     renderCard(canvasRef.current, {
       qrUrl: resolveAssetUrl(qr.imageUrl)!,
       logoUrl: "/logo.png",
-      restaurantName: settings?.restaurantName ?? "Nagami",
+      restaurantName: settings?.restaurantName ?? "Nadhamuni",
       address: settings?.address,
       contact: settings?.contact,
     }).finally(() => {
@@ -194,7 +194,7 @@ export default function QRManagement() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "nagami-menu-qr.png";
+      link.download = "nadhamuni-menu-qr.png";
       link.click();
       window.URL.revokeObjectURL(url);
     }, "image/png");

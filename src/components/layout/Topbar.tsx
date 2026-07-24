@@ -31,7 +31,7 @@ export function Topbar({ title }: { title: string }) {
           <div className="flex items-center gap-2.5">
             <img src="/logo.png" alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
             <div className="leading-tight">
-              <p className="text-sm font-semibold">{settings?.restaurantName ?? "Nagami Restaurant"}</p>
+              <p className="text-sm font-semibold">{settings?.restaurantName ?? "Nadhamuni Restaurant"}</p>
               <p className="text-xs text-[var(--text-muted)]">Welcome back, {user?.name}</p>
             </div>
           </div>

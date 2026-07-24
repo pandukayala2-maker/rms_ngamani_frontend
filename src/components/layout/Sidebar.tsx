@@ -23,7 +23,7 @@ export function Sidebar() {
       <div className="mb-6 flex items-center gap-2.5 px-2">
         <img src="/logo.png" alt="" className="h-10 w-10 shrink-0 rounded-xl object-contain" />
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold leading-tight">{settings?.restaurantName ?? "Nagami Restaurant"}</p>
+          <p className="truncate text-sm font-semibold leading-tight">{settings?.restaurantName ?? "Nadhamuni Restaurant"}</p>
           <p className="text-xs text-[var(--text-muted)] leading-tight">{activeModule?.label ?? "Restaurant OS"}</p>
         </div>
       </div>

@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Gold identity matching the Nagami "Good Food | Good Mood" logo,
+        // Gold identity matching the Nadhamuni "Good Food | Good Mood" logo,
         // used across the whole app (admin dashboard, auth pages, QR menu).
         brand: {
           50: "#fefaf0",

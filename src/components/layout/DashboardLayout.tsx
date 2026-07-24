@@ -40,7 +40,7 @@ export function DashboardLayout() {
   const title =
     titles[location.pathname] ??
     titles[`/${location.pathname.split("/")[1]}`] ??
-    "Nagami Restaurant";
+    "Nadhamuni Restaurant";
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-page)]">

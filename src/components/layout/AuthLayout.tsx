@@ -15,9 +15,9 @@ export function AuthLayout() {
         className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 bg-neutral-900 p-8 shadow-2xl shadow-black/40"
       >
         <div className="mb-6 flex items-center gap-3">
-          <img src="/logo.png" alt="Nagami Restaurant" className="h-11 w-11 rounded-xl object-contain" />
+          <img src="/logo.png" alt="Nadhamuni Restaurant" className="h-11 w-11 rounded-xl object-contain" />
           <div>
-            <p className="text-sm font-semibold leading-tight text-white">Nagami Restaurant</p>
+            <p className="text-sm font-semibold leading-tight text-white">Nadhamuni Restaurant</p>
             <p className="text-xs text-neutral-400 leading-tight">Good Food, Good Mood</p>
           </div>
         </div>
