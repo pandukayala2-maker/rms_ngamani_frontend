@@ -18,6 +18,7 @@ export const NAV_KEYS = [
   "qr",
   // Accounts & Reports module
   "pos-report",
+  "product-performance",
   "orders",
   "profit-loss",
   "balance-sheet",
@@ -43,6 +44,7 @@ export const NAV_KEY_LABELS: Record<NavKey, string> = {
   menu: "Menu Items",
   qr: "QR Screen",
   "pos-report": "POS Reports",
+  "product-performance": "Product Performance",
   orders: "Orders",
   "profit-loss": "Profit & Loss",
   "balance-sheet": "Balance Sheet",

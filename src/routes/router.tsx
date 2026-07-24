@@ -37,6 +37,7 @@ const Designations = () => lazyPage(() => import("../pages/roles/Designations"))
 const Shifts = () => lazyPage(() => import("../pages/roles/Shifts"));
 const RolePermissions = () => lazyPage(() => import("../pages/roles/RolePermissions"));
 const PosReport = () => lazyPage(() => import("../pages/reports/PosReport"));
+const ProductPerformance = () => lazyPage(() => import("../pages/accounts/ProductPerformance"));
 const ProfitLoss = () => lazyPage(() => import("../pages/accounts/ProfitLoss"));
 const BalanceSheet = () => lazyPage(() => import("../pages/accounts/BalanceSheet"));
 const ChartOfAccounts = () => lazyPage(() => import("../pages/accounts/ChartOfAccounts"));
@@ -106,6 +107,7 @@ export const router = createBrowserRouter([
                 element: <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]} />,
                 children: [
                   { index: true, element: <PosReport /> },
+                  { path: "product-performance", element: <ProductPerformance /> },
                   { path: "profit-loss", element: <ProfitLoss /> },
                   { path: "balance-sheet", element: <BalanceSheet /> },
                   { path: "expenses", element: <Expenses /> },

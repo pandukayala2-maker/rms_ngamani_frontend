@@ -26,12 +26,6 @@ interface CashierReportRow {
   total: number;
 }
 
-interface ProductReportRow {
-  name: string;
-  quantitySold: number;
-  revenue: number;
-}
-
 function useBusinessReport<T>(path: string) {
   return useQuery({
     queryKey: ["reports", path],
@@ -45,7 +39,6 @@ function useBusinessReport<T>(path: string) {
 export default function PosReport() {
   const { data: sales, isLoading: salesLoading } = useBusinessReport<SalesReport>("sales");
   const { data: cashiers, isLoading: cashiersLoading } = useBusinessReport<CashierReportRow[]>("cashier");
-  const { data: products, isLoading: productsLoading } = useBusinessReport<ProductReportRow[]>("product");
 
   const { data: sessions, isLoading } = useSessionHistory();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -94,7 +87,7 @@ export default function PosReport() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Sales Summary</CardTitle>
@@ -123,23 +116,6 @@ export default function PosReport() {
             <div className="space-y-1 text-sm">
               {cashiers.map((c) => (
                 <Row key={c.cashier} label={`${c.cashier} (${c.orders})`} value={currency.format(c.total)} />
-              ))}
-            </div>
-          )}
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Product Performance</CardTitle>
-          </CardHeader>
-          {productsLoading || !products ? (
-            <Skeleton className="h-24 w-full" />
-          ) : products.length === 0 ? (
-            <p className="text-sm text-[var(--text-muted)]">No completed sales yet</p>
-          ) : (
-            <div className="max-h-48 space-y-1 overflow-y-auto scrollbar-thin text-sm">
-              {products.map((p) => (
-                <Row key={p.name} label={`${p.name} (${p.quantitySold})`} value={currency.format(p.revenue)} />
               ))}
             </div>
           )}

@@ -20,6 +20,7 @@ const titles: Record<string, string> = {
   "/menu/categories": "Category",
   "/menu/qr": "QR Screen",
   "/accounts": "POS Reports",
+  "/accounts/product-performance": "Product Performance",
   "/accounts/orders": "Orders",
   "/accounts/profit-loss": "Profit & Loss",
   "/accounts/balance-sheet": "Balance Sheet",

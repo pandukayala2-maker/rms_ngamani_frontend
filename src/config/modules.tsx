@@ -19,6 +19,7 @@ import {
   HiOutlineIdentification,
   HiOutlineBriefcase,
   HiOutlineCalculator,
+  HiOutlineTrophy,
 } from "react-icons/hi2";
 import { TbUserCog } from "react-icons/tb";
 import { MdOutlinePointOfSale, MdOutlineRoomService } from "react-icons/md";
@@ -116,9 +117,10 @@ export const MODULES: AppModule[] = [
     ring: "border-emerald-400/50",
     iconColor: "text-emerald-300",
     iconGlow: "drop-shadow-[0_0_10px_rgba(52,211,153,0.75)]",
-    navKeys: ["pos-report", "orders", "profit-loss", "balance-sheet", "expenses", "customers", "tables", "chart-of-accounts"],
+    navKeys: ["pos-report", "product-performance", "orders", "profit-loss", "balance-sheet", "expenses", "customers", "tables", "chart-of-accounts"],
     items: [
       { to: "/accounts", label: "POS Reports", icon: <HiOutlineDocumentChartBar size={18} />, navKey: "pos-report" },
+      { to: "/accounts/product-performance", label: "Product Performance", icon: <HiOutlineTrophy size={18} />, navKey: "product-performance" },
       { to: "/accounts/orders", label: "Orders", icon: <HiOutlineClipboardDocumentList size={18} />, navKey: "orders" },
       { to: "/accounts/profit-loss", label: "Profit & Loss", icon: <HiOutlineChartBar size={18} />, navKey: "profit-loss" },
       { to: "/accounts/balance-sheet", label: "Balance Sheet", icon: <HiOutlineCalculator size={18} />, navKey: "balance-sheet" },
