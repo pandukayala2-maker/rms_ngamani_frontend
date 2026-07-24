@@ -2,16 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import { HiOutlinePencil, HiOutlinePlus, HiOutlineTrash } from "react-icons/hi2";
+import { HiOutlinePencil, HiOutlinePlus } from "react-icons/hi2";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input, Select } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
-import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { DataTable } from "../../components/ui/DataTable";
 import {
   useCreateDesignation,
-  useDeleteDesignation,
   useDepartments,
   useDesignations,
   useUpdateDesignation,
@@ -29,11 +27,9 @@ export default function Designations() {
   const { data: departments } = useDepartments();
   const createDesignation = useCreateDesignation();
   const updateDesignation = useUpdateDesignation();
-  const deleteDesignation = useDeleteDesignation();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Designation | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Designation | null>(null);
   const { register, handleSubmit, reset } = useForm<FormValues>();
 
   useEffect(() => {
@@ -72,9 +68,6 @@ export default function Designations() {
               }}
             >
               <HiOutlinePencil size={15} />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(row.original)}>
-              <HiOutlineTrash size={15} className="text-red-500" />
             </Button>
           </div>
         ),
@@ -122,26 +115,6 @@ export default function Designations() {
           </div>
         </form>
       </Modal>
-
-      <ConfirmDialog
-        open={!!deleteTarget}
-        title="Delete designation"
-        description={`Delete "${deleteTarget?.name}"?`}
-        danger
-        confirmLabel="Delete"
-        isLoading={deleteDesignation.isPending}
-        onCancel={() => setDeleteTarget(null)}
-        onConfirm={() =>
-          deleteTarget &&
-          deleteDesignation.mutate(deleteTarget.id, {
-            onSuccess: () => {
-              toast.success("Designation deleted");
-              setDeleteTarget(null);
-            },
-            onError: (err) => toast.error(getErrorMessage(err)),
-          })
-        }
-      />
     </div>
   );
 }
