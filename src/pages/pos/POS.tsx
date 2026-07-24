@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   HiOutlineMagnifyingGlass,
@@ -42,10 +42,21 @@ export default function POS() {
   const [openingCash, setOpeningCash] = useState("");
   const [closeCounterModalOpen, setCloseCounterModalOpen] = useState(false);
   const [closingCash, setClosingCash] = useState("");
+  const [hasAutoPrompted, setHasAutoPrompted] = useState(false);
 
-  const { data: currentSession } = useCurrentSession();
+  const { data: currentSession, isSuccess: sessionLoaded } = useCurrentSession();
   const openSession = useOpenSession();
   const closeSession = useCloseSession();
+
+  // Prompt to open the counter as soon as we know none is open, so the
+  // cashier sees it immediately on arriving — but it's still dismissible,
+  // not a hard gate on using the rest of the screen.
+  useEffect(() => {
+    if (sessionLoaded && !currentSession && !hasAutoPrompted) {
+      setOpenCounterModalOpen(true);
+      setHasAutoPrompted(true);
+    }
+  }, [sessionLoaded, currentSession, hasAutoPrompted]);
 
   const { data: categories } = useCategories();
   const { data: menuData, isLoading } = useMenuItems({
