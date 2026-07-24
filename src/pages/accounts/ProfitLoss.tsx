@@ -10,9 +10,9 @@ import {
 import { api } from "../../lib/axios";
 import { Select } from "../../components/ui/Input";
 import { Skeleton } from "../../components/ui/Skeleton";
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
+import { useSettings } from "../../hooks/useSettings";
 import type { ApiResponse } from "../../types";
-
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 
 interface ProfitLossReport {
   revenue: number;
@@ -42,6 +42,8 @@ function periodRange(period: Period): { from?: string; to?: string } {
 }
 
 export default function ProfitLoss() {
+  const currency = useCurrencyFormatter();
+  const { data: settings } = useSettings();
   const [period, setPeriod] = useState<Period>("today");
   const { from, to } = useMemo(() => periodRange(period), [period]);
 
@@ -83,7 +85,7 @@ export default function ProfitLoss() {
           <div>
             <div className="flex items-center justify-between px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
               <span>Particulars</span>
-              <span>Amount (₹)</span>
+              <span>Amount ({settings?.currency ?? "—"})</span>
             </div>
             <div className="divide-y divide-[var(--border-color)] border-t border-[var(--border-color)]">
               <LineRow

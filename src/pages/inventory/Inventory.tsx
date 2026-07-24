@@ -14,10 +14,9 @@ import {
   useInventoryItems,
   useRecordStockMovement,
 } from "../../hooks/useInventory";
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
 import { getErrorMessage } from "../../lib/axios";
 import type { InventoryItem } from "../../types";
-
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 
 interface CreateFormValues {
   name: string;
@@ -34,6 +33,7 @@ interface MovementFormValues {
 }
 
 export default function Inventory() {
+  const currency = useCurrencyFormatter();
   const { data: items, isLoading } = useInventoryItems();
   const createItem = useCreateInventoryItem();
   const recordMovement = useRecordStockMovement();
@@ -103,7 +103,7 @@ export default function Inventory() {
         ),
       },
     ],
-    []
+    [currency]
   );
 
   return (

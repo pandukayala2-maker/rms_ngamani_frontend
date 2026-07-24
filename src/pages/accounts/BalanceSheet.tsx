@@ -9,9 +9,9 @@ import {
 } from "react-icons/hi2";
 import { api } from "../../lib/axios";
 import { Skeleton } from "../../components/ui/Skeleton";
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
+import { useSettings } from "../../hooks/useSettings";
 import type { ApiResponse } from "../../types";
-
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 
 interface BalanceSheetReport {
   assets: { inventoryValue: number; cashOnHand: number; total: number };
@@ -21,6 +21,8 @@ interface BalanceSheetReport {
 }
 
 export default function BalanceSheet() {
+  const currency = useCurrencyFormatter();
+  const { data: settings } = useSettings();
   const { data, isLoading } = useQuery({
     queryKey: ["reports", "balance-sheet"],
     queryFn: async () => {
@@ -48,7 +50,7 @@ export default function BalanceSheet() {
           <div>
             <div className="flex items-center justify-between px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
               <span>Particulars</span>
-              <span>Amount (₹)</span>
+              <span>Amount ({settings?.currency ?? "—"})</span>
             </div>
             <div className="divide-y divide-[var(--border-color)] border-t border-[var(--border-color)]">
               <LineRow

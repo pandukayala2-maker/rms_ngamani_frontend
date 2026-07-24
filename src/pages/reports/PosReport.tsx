@@ -6,11 +6,12 @@ import { DataTable } from "../../components/ui/DataTable";
 import { Modal } from "../../components/ui/Modal";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { useSessionHistory, useSessionReport, type PosSession } from "../../hooks/usePosSessions";
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
 
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 const dateTime = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" });
 
 export default function PosReport() {
+  const currency = useCurrencyFormatter();
   const { data: sessions, isLoading } = useSessionHistory();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { data: report, isLoading: reportLoading } = useSessionReport(selectedId);
@@ -53,7 +54,7 @@ export default function PosReport() {
         ),
       },
     ],
-    []
+    [currency]
   );
 
   return (

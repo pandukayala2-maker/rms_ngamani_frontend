@@ -23,9 +23,11 @@ import {
   type MenuQuery,
 } from "../../hooks/useMenu";
 import { useCategories } from "../../hooks/useCategories";
+import { useSettings } from "../../hooks/useSettings";
 import { api, getErrorMessage } from "../../lib/axios";
 import { resolveAssetUrl } from "../../lib/assets";
 import { categoryIcon } from "../../lib/categoryIcon";
+import { currencySymbol } from "../../lib/currency";
 import type { MenuItem, MenuItemStatus } from "../../types";
 import { MenuForm } from "./MenuForm";
 
@@ -46,8 +48,10 @@ export default function MenuList() {
 
   const { data, isLoading } = useMenuItems(query);
   const { data: categories } = useCategories();
+  const { data: settings } = useSettings();
   const deleteItem = useDeleteMenuItem();
   const duplicateItem = useDuplicateMenuItem();
+  const currency = currencySymbol(settings?.currency);
 
   const columns = useMemo<ColumnDef<MenuItem, any>[]>(
     () => [
@@ -85,11 +89,20 @@ export default function MenuList() {
           <div>
             {row.original.discountPrice ? (
               <>
-                <span className="font-semibold">₹{row.original.discountPrice}</span>{" "}
-                <span className="text-xs text-[var(--text-muted)] line-through">₹{row.original.price}</span>
+                <span className="font-semibold">
+                  {currency}
+                  {row.original.discountPrice}
+                </span>{" "}
+                <span className="text-xs text-[var(--text-muted)] line-through">
+                  {currency}
+                  {row.original.price}
+                </span>
               </>
             ) : (
-              <span className="font-semibold">₹{row.original.price}</span>
+              <span className="font-semibold">
+                {currency}
+                {row.original.price}
+              </span>
             )}
           </div>
         ),
@@ -146,7 +159,7 @@ export default function MenuList() {
         ),
       },
     ],
-    [duplicateItem]
+    [duplicateItem, currency]
   );
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {

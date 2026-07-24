@@ -4,9 +4,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Card } from "../../components/ui/Card";
 import { DataTable } from "../../components/ui/DataTable";
 import { api } from "../../lib/axios";
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
 import type { ApiResponse } from "../../types";
-
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 
 interface ProductReportRow {
   name: string;
@@ -15,6 +14,7 @@ interface ProductReportRow {
 }
 
 export default function ProductPerformance() {
+  const currency = useCurrencyFormatter();
   const { data, isLoading } = useQuery({
     queryKey: ["reports", "product"],
     queryFn: async () => {
@@ -29,7 +29,7 @@ export default function ProductPerformance() {
       { header: "Qty Sold", accessorKey: "quantitySold" },
       { header: "Revenue", cell: ({ row }) => currency.format(row.original.revenue) },
     ],
-    []
+    [currency]
   );
 
   return (

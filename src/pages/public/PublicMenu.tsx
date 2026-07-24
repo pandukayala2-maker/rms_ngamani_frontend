@@ -18,6 +18,7 @@ import {
 } from "react-icons/hi2";
 import { api, getErrorMessage } from "../../lib/axios";
 import { resolveAssetUrl } from "../../lib/assets";
+import { currencySymbol } from "../../lib/currency";
 import { categoryIcon } from "../../lib/categoryIcon";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { EmptyState } from "../../components/ui/EmptyState";
@@ -44,11 +45,6 @@ interface CartLine {
 type ViewMode = "grid" | "list";
 
 const spicyDots: Record<string, number> = { NONE: 0, MILD: 1, MEDIUM: 2, HOT: 3, EXTRA_HOT: 4 };
-
-const currencySymbols: Record<string, string> = { INR: "₹", USD: "$", EUR: "€", GBP: "£", KWD: "KD " };
-function currencyLabel(code: string) {
-  return currencySymbols[code] ?? `${code} `;
-}
 
 export default function PublicMenu() {
   const { token } = useParams<{ token: string }>();
@@ -163,7 +159,7 @@ export default function PublicMenu() {
   }
 
   const currentCategory = activeCategory ?? data.categories[0]?.id;
-  const currency = currencyLabel(data.restaurant.currency);
+  const currency = currencySymbol(data.restaurant.currency);
   const isSearching = search.trim().length > 0;
   const currentItems = isSearching
     ? data.categories

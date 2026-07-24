@@ -16,7 +16,7 @@ import {
   HiOutlineBanknotes,
   HiOutlineShoppingBag,
   HiOutlineChartBarSquare,
-  HiOutlineCurrencyRupee,
+  HiOutlineWallet,
   HiOutlineSquares2X2,
   HiOutlineEyeSlash,
   HiOutlineArchiveBox,
@@ -36,10 +36,10 @@ import {
   useTopSellingItems,
 } from "../../hooks/useDashboard";
 import { categorical, chartChrome } from "../../lib/chartColors";
-
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
 
 export default function Dashboard() {
+  const currency = useCurrencyFormatter({ maximumFractionDigits: 0 });
   const { theme } = useThemeStore();
   const mode = theme === "dark" ? "dark" : "light";
   const chrome = chartChrome[mode];
@@ -59,7 +59,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <StatCard label="Today's Sales" value={currency.format(kpis.todaySales)} icon={<HiOutlineBanknotes size={20} />} />
           <StatCard label="Orders Today" value={String(kpis.todayOrders)} icon={<HiOutlineShoppingBag size={20} />} />
-          <StatCard label="Revenue" value={currency.format(kpis.revenue)} icon={<HiOutlineCurrencyRupee size={20} />} />
+          <StatCard label="Revenue" value={currency.format(kpis.revenue)} icon={<HiOutlineWallet size={20} />} />
           <StatCard label="Profit (est.)" value={currency.format(kpis.profit)} icon={<HiOutlineChartBarSquare size={20} />} />
           <StatCard label="Active Menu Items" value={String(kpis.activeMenuItems)} icon={<HiOutlineSquares2X2 size={20} />} />
           <StatCard label="Hidden Items" value={String(kpis.hiddenMenuItems)} icon={<HiOutlineEyeSlash size={20} />} />

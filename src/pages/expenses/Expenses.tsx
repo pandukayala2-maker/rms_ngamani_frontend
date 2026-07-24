@@ -11,9 +11,9 @@ import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { DataTable } from "../../components/ui/DataTable";
 import { useCreateExpense, useDeleteExpense, useExpenses, useUpdateExpense, type Expense } from "../../hooks/useExpenses";
 import { useAccounts } from "../../hooks/useAccounts";
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
 import { getErrorMessage } from "../../lib/axios";
 
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
 
 interface FormValues {
@@ -25,6 +25,7 @@ interface FormValues {
 }
 
 export default function Expenses() {
+  const currency = useCurrencyFormatter();
   const { data: expenses, isLoading } = useExpenses();
   const { data: accounts } = useAccounts();
   const createExpense = useCreateExpense();
@@ -92,7 +93,7 @@ export default function Expenses() {
         ),
       },
     ],
-    []
+    [currency]
   );
 
   return (

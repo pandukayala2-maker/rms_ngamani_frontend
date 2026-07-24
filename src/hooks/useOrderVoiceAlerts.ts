@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { useCurrencyFormatter } from "./useCurrency";
 import type { Order } from "../types";
-
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 
 function speak(text: string) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -17,6 +16,7 @@ function speak(text: string) {
 // since browsers require a user gesture before speech synthesis is allowed
 // to run reliably.
 export function useOrderVoiceAlerts(orders: Order[] | undefined) {
+  const currency = useCurrencyFormatter();
   const [enabled, setEnabled] = useState(false);
   const seenIds = useRef<Set<string> | null>(null);
 
@@ -39,7 +39,7 @@ export function useOrderVoiceAlerts(orders: Order[] | undefined) {
         );
       }
     }
-  }, [orders, enabled]);
+  }, [orders, enabled, currency]);
 
   return {
     enabled,

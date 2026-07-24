@@ -2,9 +2,8 @@ import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useHeldOrders } from "../../hooks/useOrders";
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
 import type { Order } from "../../types";
-
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 
 interface HeldBillsModalProps {
   open: boolean;
@@ -13,6 +12,7 @@ interface HeldBillsModalProps {
 }
 
 export function HeldBillsModal({ open, onClose, onResume }: HeldBillsModalProps) {
+  const currency = useCurrencyFormatter();
   const { data, isLoading } = useHeldOrders();
 
   return (

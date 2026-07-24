@@ -32,7 +32,7 @@ export default function Branches() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Branch | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Branch | null>(null);
-  const { register, handleSubmit, reset } = useForm<FormValues>({ defaultValues: { currency: "INR", language: "en" } });
+  const { register, handleSubmit, reset } = useForm<FormValues>({ defaultValues: { currency: "KWD", language: "en" } });
 
   useEffect(() => {
     if (modalOpen) {
@@ -46,7 +46,7 @@ export default function Branches() {
               currency: editing.currency,
               language: editing.language,
             }
-          : { name: "", address: "", contact: "", gstVat: "", currency: "INR", language: "en" }
+          : { name: "", address: "", contact: "", gstVat: "", currency: "KWD", language: "en" }
       );
     }
   }, [modalOpen, editing, reset]);

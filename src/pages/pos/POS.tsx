@@ -22,6 +22,7 @@ import { useMenuItems } from "../../hooks/useMenu";
 import { useTables } from "../../hooks/useTables";
 import { useCreateOrder } from "../../hooks/useOrders";
 import { useCurrentSession, useOpenSession, useCloseSession } from "../../hooks/usePosSessions";
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
 import { useCartStore } from "../../store/cartStore";
 import { getErrorMessage } from "../../lib/axios";
 import { resolveAssetUrl } from "../../lib/assets";
@@ -29,10 +30,10 @@ import type { Order, OrderType } from "../../types";
 import { PaymentModal } from "./PaymentModal";
 import { HeldBillsModal } from "./HeldBillsModal";
 
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 const timeFmt = new Intl.DateTimeFormat("en-IN", { hour: "2-digit", minute: "2-digit" });
 
 export default function POS() {
+  const currency = useCurrencyFormatter();
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState("");
   const [barcodeInput, setBarcodeInput] = useState("");

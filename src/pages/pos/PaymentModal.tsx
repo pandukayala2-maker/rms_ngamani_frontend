@@ -5,11 +5,11 @@ import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
 import { Input, Select } from "../../components/ui/Input";
 import { useAddPayments } from "../../hooks/useOrders";
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
 import { getErrorMessage } from "../../lib/axios";
 import { openReceipt } from "../../lib/receipt";
 import type { Order, PaymentMethod } from "../../types";
 
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 const methods: PaymentMethod[] = ["CASH", "CARD", "UPI", "WALLET"];
 
 interface SplitLine {
@@ -18,6 +18,7 @@ interface SplitLine {
 }
 
 export function PaymentModal({ order, onClose }: { order: Order | null; onClose: () => void }) {
+  const currency = useCurrencyFormatter();
   const addPayments = useAddPayments();
   const [splits, setSplits] = useState<SplitLine[]>([{ method: "CASH", amount: 0 }]);
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);

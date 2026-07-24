@@ -9,11 +9,10 @@ import { Button } from "../../components/ui/Button";
 import { DataTable } from "../../components/ui/DataTable";
 import { useOrders, useUpdateOrderStatus } from "../../hooks/useOrders";
 import { useOrderVoiceAlerts } from "../../hooks/useOrderVoiceAlerts";
+import { useCurrencyFormatter } from "../../hooks/useCurrency";
 import { getErrorMessage } from "../../lib/axios";
 import { openReceipt } from "../../lib/receipt";
 import type { Order, OrderStatus } from "../../types";
-
-const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 
 const statusTone: Record<OrderStatus, "neutral" | "warning" | "good" | "critical" | "brand"> = {
   PENDING: "neutral",
@@ -30,6 +29,7 @@ const nextStatus: Partial<Record<OrderStatus, OrderStatus>> = {
 };
 
 export default function Orders() {
+  const currency = useCurrencyFormatter();
   const [status, setStatus] = useState<string>("");
   const [page, setPage] = useState(1);
   const { data, isLoading } = useOrders(
@@ -85,7 +85,7 @@ export default function Orders() {
         },
       },
     ],
-    [updateStatus]
+    [updateStatus, currency]
   );
 
   return (
