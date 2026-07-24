@@ -167,8 +167,8 @@ export default function MenuList() {
   return (
     <div className="space-y-4">
       <MenuTabs />
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center justify-between gap-3 overflow-x-auto pb-1">
+        <div className="flex shrink-0 items-center gap-2">
           <Input
             placeholder="Search items..."
             value={search}
@@ -205,7 +205,7 @@ export default function MenuList() {
             <option value="DISABLED">Disabled</option>
           </Select>
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           <input ref={fileInputRef} type="file" accept="application/json" hidden onChange={handleImport} />
           <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
             <HiOutlineArrowUpTray size={16} className="mr-1" /> Import
