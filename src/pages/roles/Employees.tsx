@@ -147,43 +147,45 @@ export default function Employees() {
         <DataTable columns={columns} data={staff ?? []} isLoading={isLoading} emptyTitle="No employees yet" />
       </Card>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit Employee" : "Add Employee"} maxWidth="max-w-md">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit Employee" : "Add Employee"} maxWidth="max-w-2xl">
         <form onSubmit={onSubmit} className="space-y-4">
-          <Input label="Name" {...register("name", { required: true })} />
-          <Input label="Email" type="email" disabled={!!editing} {...register("email", { required: true })} />
-          {!editing && <Input label="Password" type="password" {...register("password", { required: true, minLength: 8 })} />}
-          <Select label="Role" {...register("role")}>
-            <option value="ADMIN">Admin</option>
-            <option value="MANAGER">Manager</option>
-            <option value="CASHIER">Cashier</option>
-          </Select>
-          <Input label="Phone (optional)" {...register("phone")} />
-          <Input label="Employee Code (optional)" {...register("employeeCode")} />
-          <Select label="Department (optional)" {...register("departmentId")}>
-            <option value="">None</option>
-            {departments?.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </Select>
-          <Select label="Designation (optional)" {...register("designationId")}>
-            <option value="">None</option>
-            {designations?.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </Select>
-          <Select label="Shift (optional)" {...register("shiftId")}>
-            <option value="">None</option>
-            {shifts?.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name} ({s.startTime}–{s.endTime})
-              </option>
-            ))}
-          </Select>
-          <div className="flex justify-end gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input label="Name" {...register("name", { required: true })} />
+            <Input label="Email" type="email" disabled={!!editing} {...register("email", { required: true })} />
+            {!editing && <Input label="Password" type="password" {...register("password", { required: true, minLength: 8 })} />}
+            <Select label="Role" {...register("role")}>
+              <option value="ADMIN">Admin</option>
+              <option value="MANAGER">Manager</option>
+              <option value="CASHIER">Cashier</option>
+            </Select>
+            <Input label="Phone (optional)" {...register("phone")} />
+            <Input label="Employee Code (optional)" {...register("employeeCode")} />
+            <Select label="Department (optional)" {...register("departmentId")}>
+              <option value="">None</option>
+              {departments?.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </Select>
+            <Select label="Designation (optional)" {...register("designationId")}>
+              <option value="">None</option>
+              {designations?.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </Select>
+            <Select label="Shift (optional)" {...register("shiftId")}>
+              <option value="">None</option>
+              {shifts?.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.startTime}–{s.endTime})
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>
