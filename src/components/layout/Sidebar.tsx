@@ -1,6 +1,5 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import clsx from "clsx";
-import { HiOutlineArrowLeft } from "react-icons/hi2";
 import { useAuthStore } from "../../store/authStore";
 import { useSettings } from "../../hooks/useSettings";
 import { useMyPermissions } from "../../hooks/usePermissions";
@@ -28,13 +27,6 @@ export function Sidebar() {
           <p className="text-xs text-[var(--text-muted)] leading-tight">{activeModule?.label ?? "Restaurant OS"}</p>
         </div>
       </div>
-
-      <Link
-        to="/"
-        className="mb-3 flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-surface-2)]"
-      >
-        <HiOutlineArrowLeft size={14} /> All Modules
-      </Link>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto scrollbar-thin">
         {items.map((item) => (

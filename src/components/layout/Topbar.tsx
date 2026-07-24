@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { HiOutlineMoon, HiOutlineSun, HiOutlineArrowRightOnRectangle, HiOutlineBanknotes } from "react-icons/hi2";
+import { HiOutlineMoon, HiOutlineSun, HiOutlineArrowRightOnRectangle, HiOutlineBanknotes, HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useThemeStore } from "../../store/themeStore";
 import { useAuthStore } from "../../store/authStore";
 import { useLogout } from "../../hooks/useAuth";
@@ -9,7 +9,7 @@ import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { getErrorMessage } from "../../lib/axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
 
@@ -18,6 +18,8 @@ export function Topbar({ title }: { title: string }) {
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHub = location.pathname === "/";
 
   const { data: currentSession } = useCurrentSession();
   const closeSession = useCloseSession();
@@ -47,7 +49,19 @@ export function Topbar({ title }: { title: string }) {
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-surface)]/70 px-6 backdrop-blur-xl">
-      <h1 className="text-lg font-semibold">{title}</h1>
+      <div className="flex items-center gap-3">
+        {!isHub && (
+          <Link
+            to="/"
+            className="rounded-lg p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface-2)]"
+            aria-label="All Modules"
+            title="All Modules"
+          >
+            <HiOutlineSquares2X2 size={18} />
+          </Link>
+        )}
+        <h1 className="text-lg font-semibold">{title}</h1>
+      </div>
       <div className="flex items-center gap-3">
         {currentSession && (
           <Button size="sm" variant="outline" onClick={() => setCloseModalOpen(true)}>
