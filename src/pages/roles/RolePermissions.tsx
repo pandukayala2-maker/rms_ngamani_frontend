@@ -1,7 +1,6 @@
 import { toast } from "sonner";
 import { Card } from "../../components/ui/Card";
 import { SkeletonRows } from "../../components/ui/Skeleton";
-import { RoleManagementTabs } from "./RoleManagement";
 import { usePermissions, useUpdateRolePermission } from "../../hooks/usePermissions";
 import { NAV_KEYS, NAV_KEY_LABELS } from "../../config/navKeys";
 import { getErrorMessage } from "../../lib/axios";
@@ -26,7 +25,6 @@ export default function RolePermissions() {
 
   return (
     <div className="space-y-4">
-      <RoleManagementTabs />
       <p className="text-sm text-[var(--text-secondary)]">
         Choose which sidebar sections each role can see. Admin always has full access.
       </p>

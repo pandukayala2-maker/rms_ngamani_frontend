@@ -9,7 +9,6 @@ import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { DataTable } from "../../components/ui/DataTable";
-import { RoleManagementTabs } from "./RoleManagement";
 import { useCreateDepartment, useDeleteDepartment, useDepartments, useUpdateDepartment } from "../../hooks/useHr";
 import { getErrorMessage } from "../../lib/axios";
 import type { Department } from "../../types";
@@ -74,7 +73,6 @@ export default function Departments() {
 
   return (
     <div className="space-y-4">
-      <RoleManagementTabs />
       <div className="flex justify-end">
         <Button
           size="sm"

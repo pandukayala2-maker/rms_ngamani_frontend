@@ -9,7 +9,6 @@ import { Input, Select } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { DataTable } from "../../components/ui/DataTable";
-import { RoleManagementTabs } from "./RoleManagement";
 import {
   useCreateDesignation,
   useDeleteDesignation,
@@ -86,7 +85,6 @@ export default function Designations() {
 
   return (
     <div className="space-y-4">
-      <RoleManagementTabs />
       <div className="flex justify-end">
         <Button
           size="sm"

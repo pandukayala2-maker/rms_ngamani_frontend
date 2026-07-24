@@ -10,7 +10,6 @@ import { Badge } from "../../components/ui/Badge";
 import { Modal } from "../../components/ui/Modal";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { DataTable } from "../../components/ui/DataTable";
-import { RoleManagementTabs } from "./RoleManagement";
 import { useCreateStaff, useDeleteStaff, useStaff, useUpdateStaff } from "../../hooks/useStaff";
 import { useDepartments, useDesignations, useShifts } from "../../hooks/useHr";
 import { getErrorMessage } from "../../lib/axios";
@@ -132,7 +131,6 @@ export default function Employees() {
 
   return (
     <div className="space-y-4">
-      <RoleManagementTabs />
       <div className="flex justify-end">
         <Button
           size="sm"

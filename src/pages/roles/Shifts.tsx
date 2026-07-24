@@ -9,7 +9,6 @@ import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { DataTable } from "../../components/ui/DataTable";
-import { RoleManagementTabs } from "./RoleManagement";
 import { useCreateShift, useDeleteShift, useShifts, useUpdateShift } from "../../hooks/useHr";
 import { getErrorMessage } from "../../lib/axios";
 import type { Shift } from "../../types";
@@ -80,7 +79,6 @@ export default function Shifts() {
 
   return (
     <div className="space-y-4">
-      <RoleManagementTabs />
       <div className="flex justify-end">
         <Button
           size="sm"
