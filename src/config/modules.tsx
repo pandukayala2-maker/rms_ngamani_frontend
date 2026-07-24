@@ -37,6 +37,9 @@ export interface AppModule {
   path: string;
   navKeys: NavKey[];
   items: ModuleNavItem[];
+  /** Tailwind gradient stops used for this module's Hub tile accent. */
+  accent: string;
+  glow: string;
 }
 
 export const MODULES: AppModule[] = [
@@ -46,6 +49,8 @@ export const MODULES: AppModule[] = [
     description: "Branches, staff, and system configuration",
     icon: <HiOutlineShieldCheck size={28} />,
     path: "/admin",
+    accent: "from-violet-500 to-purple-700",
+    glow: "shadow-violet-600/25",
     navKeys: ["dashboard", "branches", "shifts", "departments", "designations", "employees", "role-management", "inventory", "settings"],
     items: [
       { to: "/admin", label: "Dashboard", icon: <HiOutlineSquares2X2 size={18} />, navKey: "dashboard" },
@@ -65,6 +70,8 @@ export const MODULES: AppModule[] = [
     description: "Live billing counter",
     icon: <HiOutlineShoppingCart size={28} />,
     path: "/pos",
+    accent: "from-emerald-500 to-teal-700",
+    glow: "shadow-emerald-600/25",
     navKeys: ["pos"],
     items: [{ to: "/pos", label: "Live Counter", icon: <HiOutlineShoppingCart size={18} />, navKey: "pos" }],
   },
@@ -74,6 +81,8 @@ export const MODULES: AppModule[] = [
     description: "Categories, items, and the QR menu",
     icon: <HiOutlineSparkles size={28} />,
     path: "/menu",
+    accent: "from-brand-400 to-brand-600",
+    glow: "shadow-brand-600/25",
     navKeys: ["menu", "qr"],
     items: [
       { to: "/menu/categories", label: "Category", icon: <HiOutlineSparkles size={18} />, navKey: "menu" },
@@ -87,6 +96,8 @@ export const MODULES: AppModule[] = [
     description: "Orders, expenses, and financial reports",
     icon: <HiOutlineChartBar size={28} />,
     path: "/accounts",
+    accent: "from-sky-500 to-blue-700",
+    glow: "shadow-sky-600/25",
     navKeys: ["pos-report", "orders", "profit-loss", "balance-sheet", "expenses", "customers", "tables", "chart-of-accounts"],
     items: [
       { to: "/accounts", label: "POS Reports", icon: <HiOutlineDocumentChartBar size={18} />, navKey: "pos-report" },
