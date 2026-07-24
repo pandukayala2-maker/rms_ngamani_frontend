@@ -4,11 +4,9 @@ import { HiOutlineLockClosed, HiArrowRight } from "react-icons/hi2";
 import { MODULES } from "../../config/modules";
 import { useAuthStore } from "../../store/authStore";
 import { useMyPermissions } from "../../hooks/usePermissions";
-import { useSettings } from "../../hooks/useSettings";
 
 export default function Hub() {
   const user = useAuthStore((s) => s.user);
-  const { data: settings } = useSettings();
   const { data: myPermissions } = useMyPermissions();
 
   const isAdmin = user?.role === "ADMIN";
@@ -16,18 +14,8 @@ export default function Hub() {
   const canEnter = (moduleNavKeys: string[]) => isAdmin || moduleNavKeys.some((k) => allowedNavKeys.includes(k));
 
   return (
-    <div className="flex min-h-full flex-col items-center justify-center gap-12 py-10">
-      <div className="flex flex-col items-center gap-3 text-center">
-        <img
-          src="/logo.png"
-          alt={settings?.restaurantName ?? "Nagami Restaurant"}
-          className="h-16 w-16 rounded-2xl object-contain shadow-lg"
-        />
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">{settings?.restaurantName ?? "Nagami Restaurant"}</h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">Welcome back, {user?.name}. Choose a module to continue.</p>
-        </div>
-      </div>
+    <div className="flex min-h-full flex-col items-center justify-center gap-6 py-10">
+      <p className="text-sm text-[var(--text-muted)]">Choose a module to continue</p>
 
       <div className="grid w-full max-w-6xl grid-cols-1 gap-5 px-4 sm:grid-cols-2 lg:grid-cols-4">
         {MODULES.map((module) => {

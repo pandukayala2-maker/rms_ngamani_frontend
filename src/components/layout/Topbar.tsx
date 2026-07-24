@@ -4,6 +4,7 @@ import { HiOutlineMoon, HiOutlineSun, HiOutlineArrowRightOnRectangle, HiOutlineB
 import { useThemeStore } from "../../store/themeStore";
 import { useAuthStore } from "../../store/authStore";
 import { useLogout } from "../../hooks/useAuth";
+import { useSettings } from "../../hooks/useSettings";
 import { useCurrentSession, useCloseSession } from "../../hooks/usePosSessions";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
@@ -20,6 +21,7 @@ export function Topbar({ title }: { title: string }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isHub = location.pathname === "/";
+  const { data: settings } = useSettings();
 
   const { data: currentSession } = useCurrentSession();
   const closeSession = useCloseSession();
@@ -60,7 +62,17 @@ export function Topbar({ title }: { title: string }) {
             <HiOutlineSquares2X2 size={18} />
           </Link>
         )}
-        <h1 className="text-lg font-semibold">{title}</h1>
+        {isHub ? (
+          <div className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
+            <div className="leading-tight">
+              <p className="text-sm font-semibold">{settings?.restaurantName ?? "Nagami Restaurant"}</p>
+              <p className="text-xs text-[var(--text-muted)]">Welcome back, {user?.name}</p>
+            </div>
+          </div>
+        ) : (
+          <h1 className="text-lg font-semibold">{title}</h1>
+        )}
       </div>
       <div className="flex items-center gap-3">
         {currentSession && (
