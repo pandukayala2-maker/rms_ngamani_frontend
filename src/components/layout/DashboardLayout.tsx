@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { motion, AnimatePresence } from "framer-motion";
+import { moduleForPath } from "../../config/modules";
 
 const titles: Record<string, string> = {
   "/": "Modules",
@@ -31,6 +32,10 @@ const titles: Record<string, string> = {
 export function DashboardLayout() {
   const location = useLocation();
   const isHub = location.pathname === "/";
+  const activeModule = moduleForPath(location.pathname);
+  // Modules with a single nav item (e.g. POS Counter) skip the sidebar
+  // entirely — a sidebar with one link is just wasted screen space.
+  const showSidebar = !isHub && (activeModule?.items.length ?? 0) > 1;
   const title =
     titles[location.pathname] ??
     titles[`/${location.pathname.split("/")[1]}`] ??
@@ -38,7 +43,7 @@ export function DashboardLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-page)]">
-      {!isHub && <Sidebar />}
+      {showSidebar && <Sidebar />}
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar title={title} />
         <main className="flex-1 overflow-y-auto scrollbar-thin p-6">

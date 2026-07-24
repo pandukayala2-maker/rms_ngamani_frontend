@@ -8,7 +8,8 @@ import {
   HiOutlineClock,
   HiOutlineQrCode,
   HiOutlineBanknotes,
-  HiOutlineXMark,
+  HiOutlineLockOpen,
+  HiOutlineLockClosed,
 } from "react-icons/hi2";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
@@ -20,7 +21,7 @@ import { useCategories } from "../../hooks/useCategories";
 import { useMenuItems } from "../../hooks/useMenu";
 import { useTables } from "../../hooks/useTables";
 import { useCreateOrder } from "../../hooks/useOrders";
-import { useCurrentSession, useOpenSession } from "../../hooks/usePosSessions";
+import { useCurrentSession, useOpenSession, useCloseSession } from "../../hooks/usePosSessions";
 import { useCartStore } from "../../store/cartStore";
 import { getErrorMessage } from "../../lib/axios";
 import { resolveAssetUrl } from "../../lib/assets";
@@ -29,6 +30,7 @@ import { PaymentModal } from "./PaymentModal";
 import { HeldBillsModal } from "./HeldBillsModal";
 
 const currency = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" });
+const timeFmt = new Intl.DateTimeFormat("en-IN", { hour: "2-digit", minute: "2-digit" });
 
 export default function POS() {
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
@@ -38,10 +40,12 @@ export default function POS() {
   const [pendingOrder, setPendingOrder] = useState<Order | null>(null);
   const [openCounterModalOpen, setOpenCounterModalOpen] = useState(false);
   const [openingCash, setOpeningCash] = useState("");
-  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [closeCounterModalOpen, setCloseCounterModalOpen] = useState(false);
+  const [closingCash, setClosingCash] = useState("");
 
   const { data: currentSession } = useCurrentSession();
   const openSession = useOpenSession();
+  const closeSession = useCloseSession();
 
   const { data: categories } = useCategories();
   const { data: menuData, isLoading } = useMenuItems({
@@ -134,28 +138,61 @@ export default function POS() {
     });
   };
 
+  const handleCloseCounter = () => {
+    if (!currentSession) return;
+    const amount = Number(closingCash);
+    if (Number.isNaN(amount) || amount < 0) return toast.error("Enter a valid closing cash amount");
+    closeSession.mutate(
+      { id: currentSession.id, closingCash: amount },
+      {
+        onSuccess: (result) => {
+          toast.success(
+            result.variance === 0
+              ? "Counter closed — cash matched exactly"
+              : `Counter closed — ${result.variance > 0 ? "over" : "short"} by ${currency.format(Math.abs(result.variance))}`
+          );
+          setCloseCounterModalOpen(false);
+          setClosingCash("");
+        },
+        onError: (err) => toast.error(getErrorMessage(err)),
+      }
+    );
+  };
+
   return (
     <div className="flex h-full flex-col gap-4">
-      {!currentSession && !bannerDismissed && (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400">
-          <div className="flex items-center gap-2">
-            <HiOutlineBanknotes size={16} />
+      <div
+        className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-2.5 text-sm ${
+          currentSession
+            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+            : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          {currentSession ? <HiOutlineLockOpen size={16} /> : <HiOutlineLockClosed size={16} />}
+          {currentSession ? (
+            <span>
+              Counter open since {timeFmt.format(new Date(currentSession.openedAt))} &middot; Opening cash{" "}
+              {currency.format(currentSession.openingCash)}
+            </span>
+          ) : (
             <span>Your counter isn&apos;t open. Open it to track cash for this shift.</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={() => setOpenCounterModalOpen(true)}>
-              Open Counter
-            </Button>
-            <button onClick={() => setBannerDismissed(true)} className="p-1 text-amber-600 dark:text-amber-400" aria-label="Dismiss">
-              <HiOutlineXMark size={14} />
-            </button>
-          </div>
+          )}
         </div>
-      )}
+        {currentSession ? (
+          <Button size="sm" variant="outline" onClick={() => setCloseCounterModalOpen(true)}>
+            <HiOutlineBanknotes size={14} className="mr-1" /> Close Counter
+          </Button>
+        ) : (
+          <Button size="sm" variant="outline" onClick={() => setOpenCounterModalOpen(true)}>
+            <HiOutlineBanknotes size={14} className="mr-1" /> Open Counter
+          </Button>
+        )}
+      </div>
 
       <div className="grid flex-1 grid-cols-1 lg:grid-cols-[220px_1fr_360px] gap-4 min-h-0">
       {/* Category sidebar */}
-      <Card className="p-3">
+      <Card className="max-h-[75vh] overflow-y-auto scrollbar-thin p-3">
         <p className="mb-2 px-1 text-xs font-semibold uppercase text-[var(--text-muted)]">Categories</p>
         <div className="space-y-1">
           <button
@@ -201,7 +238,7 @@ export default function POS() {
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-thin pr-1">
+        <div className="max-h-[65vh] overflow-y-auto scrollbar-thin pr-1">
           {isLoading ? (
             <SkeletonCards count={8} />
           ) : !menuData || menuData.items.length === 0 ? (
@@ -257,7 +294,7 @@ export default function POS() {
           )}
         </div>
 
-        <div className="flex-1 space-y-2 overflow-y-auto scrollbar-thin">
+        <div className="max-h-[32vh] space-y-2 overflow-y-auto scrollbar-thin">
           {lines.length === 0 ? (
             <EmptyState title="Cart is empty" description="Tap items to add them" />
           ) : (
@@ -352,6 +389,32 @@ export default function POS() {
             </Button>
             <Button onClick={handleOpenCounter} isLoading={openSession.isPending}>
               Open Counter
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={closeCounterModalOpen} onClose={() => setCloseCounterModalOpen(false)} title="Close Counter" maxWidth="max-w-sm">
+        <div className="space-y-4">
+          {currentSession && (
+            <p className="text-sm text-[var(--text-secondary)]">
+              Opened with {currency.format(currentSession.openingCash)}. Count the cash drawer and enter the total below.
+            </p>
+          )}
+          <Input
+            label="Closing Cash"
+            type="number"
+            min={0}
+            value={closingCash}
+            onChange={(e) => setClosingCash(e.target.value)}
+            placeholder="0"
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setCloseCounterModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCloseCounter} isLoading={closeSession.isPending}>
+              Close Counter
             </Button>
           </div>
         </div>
