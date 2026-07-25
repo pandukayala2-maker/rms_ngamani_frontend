@@ -20,7 +20,7 @@ import { SkeletonCards } from "../../components/ui/Skeleton";
 import { useCategories } from "../../hooks/useCategories";
 import { useMenuItems } from "../../hooks/useMenu";
 import { useTables } from "../../hooks/useTables";
-import { useCreateOrder } from "../../hooks/useOrders";
+import { useCreateOrder, useResumeOrder } from "../../hooks/useOrders";
 import { useCurrentSession, useOpenSession, useCloseSession } from "../../hooks/usePosSessions";
 import { useCurrencyFormatter } from "../../hooks/useCurrency";
 import { useCartStore } from "../../store/cartStore";
@@ -68,6 +68,7 @@ export default function POS() {
   });
   const { data: tables } = useTables();
   const createOrder = useCreateOrder();
+  const resumeOrder = useResumeOrder();
 
   const cart = useCartStore();
   const { lines, orderType, tableId, discount } = cart;
@@ -103,6 +104,8 @@ export default function POS() {
       {
         orderType,
         tableId: orderType === "DINE_IN" ? tableId : undefined,
+        customerId: cart.customerId,
+        couponCode: cart.couponCode,
         items: lines.map((l) => ({ menuItemId: l.menuItem.id, quantity: l.quantity })),
         discount,
         isHeld: true,
@@ -123,6 +126,8 @@ export default function POS() {
       {
         orderType,
         tableId: orderType === "DINE_IN" ? tableId : undefined,
+        customerId: cart.customerId,
+        couponCode: cart.couponCode,
         items: lines.map((l) => ({ menuItemId: l.menuItem.id, quantity: l.quantity })),
         discount,
         isHeld: false,
@@ -348,9 +353,10 @@ export default function POS() {
             <span className="text-[var(--text-secondary)]">Discount</span>
             <Input
               type="number"
+              min={0}
               className="w-24 text-right"
-              value={discount || ""}
-              onChange={(e) => cart.setDiscount(Number(e.target.value) || 0)}
+              value={discount}
+              onChange={(e) => cart.setDiscount(Math.max(0, Number(e.target.value) || 0))}
             />
           </div>
           <div className="flex justify-between">
@@ -379,7 +385,10 @@ export default function POS() {
         onClose={() => setHeldOpen(false)}
         onResume={(order) => {
           setHeldOpen(false);
-          setPendingOrder(order);
+          resumeOrder.mutate(order.id, {
+            onSuccess: (resumed) => setPendingOrder(resumed),
+            onError: (err) => toast.error(getErrorMessage(err)),
+          });
         }}
       />
 

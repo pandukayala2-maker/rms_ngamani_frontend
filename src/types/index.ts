@@ -14,6 +14,7 @@ export interface Branch {
 export interface Department {
   id: string;
   name: string;
+  isActive?: boolean;
 }
 
 export interface Designation {

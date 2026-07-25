@@ -2,13 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import { HiOutlinePencil, HiOutlinePlus } from "react-icons/hi2";
+import { HiOutlinePencil, HiOutlinePlus, HiOutlineTrash } from "react-icons/hi2";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { Badge } from "../../components/ui/Badge";
 import { Modal } from "../../components/ui/Modal";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { DataTable } from "../../components/ui/DataTable";
-import { useCreateDepartment, useDepartments, useUpdateDepartment } from "../../hooks/useHr";
+import { useCreateDepartment, useDepartments, useDeleteDepartment, useUpdateDepartment } from "../../hooks/useHr";
 import { getErrorMessage } from "../../lib/axios";
 import type { Department } from "../../types";
 
@@ -20,9 +22,11 @@ export default function Departments() {
   const { data: departments, isLoading } = useDepartments();
   const createDepartment = useCreateDepartment();
   const updateDepartment = useUpdateDepartment();
+  const deleteDepartment = useDeleteDepartment();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Department | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Department | null>(null);
   const { register, handleSubmit, reset } = useForm<FormValues>();
 
   useEffect(() => {
@@ -44,10 +48,29 @@ export default function Departments() {
     () => [
       { header: "Name", accessorKey: "name" },
       {
+        header: "Status",
+        cell: ({ row }) => (
+          <Badge tone={row.original.isActive ? "good" : "neutral"}>
+            {row.original.isActive ? "Active" : "Inactive"}
+          </Badge>
+        ),
+      },
+      {
         header: "",
         id: "actions",
         cell: ({ row }) => (
           <div className="flex justify-end gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                updateDepartment.mutate({ id: row.original.id, isActive: !row.original.isActive }, {
+                  onError: (err) => toast.error(getErrorMessage(err)),
+                })
+              }
+            >
+              {row.original.isActive ? "Deactivate" : "Activate"}
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -57,6 +80,9 @@ export default function Departments() {
               }}
             >
               <HiOutlinePencil size={15} />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(row.original)}>
+              <HiOutlineTrash size={15} className="text-red-500" />
             </Button>
           </div>
         ),
@@ -96,6 +122,26 @@ export default function Departments() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete department"
+        description={`Delete "${deleteTarget?.name}"?`}
+        danger
+        confirmLabel="Delete"
+        isLoading={deleteDepartment.isPending}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() =>
+          deleteTarget &&
+          deleteDepartment.mutate(deleteTarget.id, {
+            onSuccess: () => {
+              toast.success("Department deleted");
+              setDeleteTarget(null);
+            },
+            onError: (err) => toast.error(getErrorMessage(err)),
+          })
+        }
+      />
     </div>
   );
 }

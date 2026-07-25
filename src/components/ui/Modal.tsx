@@ -8,9 +8,17 @@ interface ModalProps {
   title?: string;
   children: ReactNode;
   maxWidth?: string;
+  closeOnBackdropClick?: boolean;
 }
 
-export function Modal({ open, onClose, title, children, maxWidth = "max-w-lg" }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  maxWidth = "max-w-lg",
+  closeOnBackdropClick = true,
+}: ModalProps) {
   return (
     <AnimatePresence>
       {open && (
@@ -20,7 +28,7 @@ export function Modal({ open, onClose, title, children, maxWidth = "max-w-lg" }:
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={onClose}
+            onClick={closeOnBackdropClick ? onClose : undefined}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 8 }}

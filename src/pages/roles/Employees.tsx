@@ -147,7 +147,13 @@ export default function Employees() {
         <DataTable columns={columns} data={staff ?? []} isLoading={isLoading} emptyTitle="No employees yet" />
       </Card>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit Employee" : "Add Employee"} maxWidth="max-w-2xl">
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editing ? "Edit Employee" : "Add Employee"}
+        maxWidth="max-w-2xl"
+        closeOnBackdropClick={false}
+      >
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input label="Name" {...register("name", { required: true })} />

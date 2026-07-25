@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -51,6 +51,7 @@ export function MenuForm({ open, onClose, item, categories }: MenuFormProps) {
   const updateItem = useUpdateMenuItem();
   const uploadImage = useUploadImage("/menu-items/upload-image");
   const [imagePath, setImagePath] = useState<string | undefined>(undefined);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -61,31 +62,35 @@ export function MenuForm({ open, onClose, item, categories }: MenuFormProps) {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   useEffect(() => {
-    if (open) {
-      setImagePath(item?.image ?? undefined);
-      reset(
-        item
-          ? {
-              ...item,
-              nameArabic: item.nameArabic ?? undefined,
-              discountPrice: item.discountPrice ?? undefined,
-              subcategory: item.subcategory ?? undefined,
-              description: item.description ?? undefined,
-              prepTimeMins: item.prepTimeMins ?? undefined,
-              ingredients: item.ingredients.join(", "),
-              tags: item.tags.join(", "),
-            }
-          : {
-              tax: 0,
-              isVeg: true,
-              spicyLevel: "NONE",
-              status: "ACTIVE",
-              showOnQr: true,
-              isAvailable: true,
-              displayOrder: 0,
-            }
-      );
+    if (!open) {
+      setImagePath(undefined);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
+
+    setImagePath(item?.image ?? undefined);
+    reset(
+      item
+        ? {
+            ...item,
+            nameArabic: item.nameArabic ?? undefined,
+            discountPrice: item.discountPrice ?? undefined,
+            subcategory: item.subcategory ?? undefined,
+            description: item.description ?? undefined,
+            prepTimeMins: item.prepTimeMins ?? undefined,
+            ingredients: item.ingredients.join(", "),
+            tags: item.tags.join(", "),
+          }
+        : {
+            tax: 0,
+            isVeg: true,
+            spicyLevel: "NONE",
+            status: "ACTIVE",
+            showOnQr: true,
+            isAvailable: true,
+            displayOrder: 0,
+          }
+    );
   }, [open, item, reset]);
 
   const onSubmit = handleSubmit((values) => {
@@ -130,7 +135,7 @@ export function MenuForm({ open, onClose, item, categories }: MenuFormProps) {
             <div className="h-16 w-16 rounded-xl bg-[var(--bg-surface-2)]" />
           )}
           <div>
-            <input type="file" accept="image/*" onChange={handleFile} className="text-xs" />
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} className="text-xs" />
             {uploadImage.isPending && <p className="text-xs text-[var(--text-muted)]">Uploading...</p>}
           </div>
         </div>
@@ -215,7 +220,11 @@ export function MenuForm({ open, onClose, item, categories }: MenuFormProps) {
           <Button type="button" variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" isLoading={createItem.isPending || updateItem.isPending}>
+          <Button
+            type="submit"
+            className="!bg-gradient-to-r !from-amber-400 !to-orange-600 !text-neutral-950 hover:!opacity-90"
+            isLoading={createItem.isPending || updateItem.isPending}
+          >
             {item ? "Save Changes" : "Create Item"}
           </Button>
         </div>
