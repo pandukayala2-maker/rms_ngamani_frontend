@@ -267,22 +267,17 @@ export default function PublicMenu() {
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
           {/* Logo & Restaurant Title */}
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 p-0.5 shadow-md shadow-orange-500/20">
-              {data.restaurant.logo ? (
-                <img
-                  src={resolveAssetUrl(data.restaurant.logo)}
-                  alt={data.restaurant.name}
-                  className="h-full w-full rounded-[14px] object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center rounded-[14px] bg-gradient-to-br from-orange-500 to-amber-600 text-white">
-                  <FaUtensils size={20} />
-                </div>
-              )}
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl shadow-md">
+              <img
+                src={resolveAssetUrl(data.restaurant.logo) ?? "/logo.png"}
+                alt={data.restaurant.name || "Nadhamuni Hotel"}
+                className="h-full w-full rounded-2xl object-contain bg-black"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/logo.png"; }}
+              />
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-lg font-bold leading-tight tracking-tight text-stone-900">
-                {data.restaurant.name}
+                {data.restaurant.name || "Nadhamuni Hotel"}
               </h1>
               <p className="text-xs font-medium text-stone-500">{t.digitalMenu}</p>
               <div className="mt-0.5 flex items-center gap-1.5 text-[11px] font-semibold">
