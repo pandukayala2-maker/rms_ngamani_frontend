@@ -163,6 +163,12 @@ function getCategoryIcon(name: string) {
   return FaUtensils;
 }
 
+function formatPrice(val: number | string | null | undefined): string {
+  if (val === null || val === undefined) return "0.000";
+  const num = typeof val === "number" ? val : Number(val);
+  return isNaN(num) ? "0.000" : num.toFixed(3);
+}
+
 export default function PublicMenu() {
   const { token } = useParams<{ token: string }>();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -453,8 +459,7 @@ export default function PublicMenu() {
                   {getItemDisplayName(heroSpecial)}
                 </h3>
                 <p className="mt-0.5 text-xs font-bold text-orange-600">
-                  {currency}
-                  {(heroSpecial.discountPrice ?? heroSpecial.price).toFixed(3)}
+                  {currency} {formatPrice(heroSpecial.discountPrice ?? heroSpecial.price)}
                 </p>
               </div>
             </div>
@@ -499,7 +504,7 @@ export default function PublicMenu() {
             {currentItems.map((item, i) => {
               const displayName = getItemDisplayName(item);
               const priceVal = item.discountPrice ?? item.price;
-              const formattedPrice = `${currency} ${priceVal.toFixed(3)}`;
+              const formattedPrice = `${currency} ${formatPrice(priceVal)}`;
 
               return (
                 <motion.div
@@ -572,7 +577,7 @@ export default function PublicMenu() {
             {currentItems.map((item, i) => {
               const displayName = getItemDisplayName(item);
               const priceVal = item.discountPrice ?? item.price;
-              const formattedPrice = `${currency} ${priceVal.toFixed(3)}`;
+              const formattedPrice = `${currency} ${formatPrice(priceVal)}`;
 
               return (
                 <motion.div
@@ -694,7 +699,7 @@ export default function PublicMenu() {
                 <div className="mt-4 text-center">
                   <h2 className="text-xl font-bold text-stone-900">{getItemDisplayName(detailItem)}</h2>
                   <p className="mt-1 text-2xl font-extrabold text-orange-600">
-                    {currency} {(detailItem.discountPrice ?? detailItem.price).toFixed(3)}
+                    {currency} {formatPrice(detailItem.discountPrice ?? detailItem.price)}
                   </p>
 
                   <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
