@@ -68,10 +68,9 @@ export default function POS() {
   const [closingCash, setClosingCash] = useState("");
   const [hasAutoPrompted, setHasAutoPrompted] = useState(false);
 
-  // Half & Half Modal state
-  const [halfModalOpen, setHalfModalOpen] = useState(false);
-  const [firstHalfId, setFirstHalfId] = useState("");
-  const [secondHalfId, setSecondHalfId] = useState("");
+  // Half & Half Selection Mode state
+  const [isHalfAndHalfMode, setIsHalfAndHalfMode] = useState(false);
+  const [firstHalfItem, setFirstHalfItem] = useState<any>(null);
 
   const { data: currentSession, isSuccess: sessionLoaded } = useCurrentSession();
   const openSession = useOpenSession();
@@ -122,6 +121,29 @@ export default function POS() {
       setBarcodeInput("");
     } else {
       toast.error("No matching item code found");
+    }
+  };
+
+  const handleProductClick = (item: any) => {
+    if (isHalfAndHalfMode) {
+      if (!firstHalfItem) {
+        setFirstHalfItem(item);
+        toast.info(`First half: ${item.name} selected. Now select the second half.`);
+      } else {
+        // Prevent selecting the same item ID for both halves in this mode if desired, 
+        // but technically possible to have half and half of same item. Let's just allow it or keep it simple.
+        cart.addItem(firstHalfItem);
+        cart.updateLinePortion(firstHalfItem.id, "HALF");
+        
+        cart.addItem(item);
+        cart.updateLinePortion(item.id, "HALF");
+
+        toast.success(`Added Half & Half: ${firstHalfItem.name} + ${item.name}`);
+        setFirstHalfItem(null);
+        setIsHalfAndHalfMode(false);
+      }
+    } else {
+      cart.addItem(item);
     }
   };
 
@@ -211,27 +233,6 @@ export default function POS() {
     );
   };
 
-  const handleAddHalfAndHalf = () => {
-    const item1 = menuData?.items.find((i) => i.id === firstHalfId);
-    const item2 = menuData?.items.find((i) => i.id === secondHalfId);
-    
-    if (!item1 || !item2) {
-      return toast.error("Please select both items");
-    }
-
-    // Add first half and second half items with portion set to HALF
-    cart.addItem(item1);
-    cart.updateLinePortion(item1.id, "HALF");
-    
-    cart.addItem(item2);
-    cart.updateLinePortion(item2.id, "HALF");
-
-    toast.success("Half & Half items added to order");
-    setFirstHalfId("");
-    setSecondHalfId("");
-    setHalfModalOpen(false);
-  };
-
   return (
     <div className="flex h-[calc(100vh-112px)] flex-col gap-4 overflow-hidden">
       <div className="grid flex-1 grid-cols-1 lg:grid-cols-[220px_1fr_360px] gap-4 min-h-0 overflow-hidden">
@@ -281,10 +282,21 @@ export default function POS() {
 
               {/* Half & Half button styled exactly like categories */}
               <button
-                onClick={() => setHalfModalOpen(true)}
-                className="flex flex-col items-center justify-center rounded-xl p-3 text-center border border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-2)] text-[var(--text-main)] transition-all"
+                onClick={() => {
+                  setIsHalfAndHalfMode((prev) => !prev);
+                  setFirstHalfItem(null);
+                }}
+                className={`flex flex-col items-center justify-center rounded-xl p-3 text-center border transition-all ${
+                  isHalfAndHalfMode 
+                    ? "bg-amber-600 text-white border-amber-600 shadow-md" 
+                    : "border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-2)] text-[var(--text-main)]"
+                }`}
               >
-                <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-xl mb-2 font-bold text-amber-600 border border-amber-200">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl mb-2 font-bold border ${
+                  isHalfAndHalfMode 
+                    ? "bg-amber-700/30 text-white border-amber-400/40" 
+                    : "bg-amber-50 text-amber-600 border-amber-200"
+                }`}>
                   🌓
                 </div>
                 <span className="text-xs font-semibold truncate w-full">Half & Half</span>
@@ -295,6 +307,31 @@ export default function POS() {
 
         {/* Product grid - Full Height Layout */}
         <div className="h-full space-y-3 flex flex-col overflow-hidden">
+          {/* Half & Half Selection banner */}
+          {isHalfAndHalfMode && (
+            <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800 flex-shrink-0 animate-pulse">
+              <div className="flex items-center gap-2 font-medium">
+                <span>🌓</span>
+                {firstHalfItem ? (
+                  <span>
+                    First Half: <strong className="text-amber-950">{firstHalfItem.name}</strong> selected. Tap second item in grid to complete.
+                  </span>
+                ) : (
+                  <span>Half & Half Mode: Tap first item in the grid below.</span>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setIsHalfAndHalfMode(false);
+                  setFirstHalfItem(null);
+                }}
+                className="text-xs underline font-bold hover:text-amber-950 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
           <div className="flex gap-2 flex-shrink-0">
             <Input
               placeholder="Search products..."
@@ -324,7 +361,7 @@ export default function POS() {
                 {menuData.items.map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => cart.addItem(item)}
+                    onClick={() => handleProductClick(item)}
                     className="glass-card flex flex-col items-start p-3 text-left hover:-translate-y-1 transition-all duration-200 border border-[var(--border-color)] bg-[var(--bg-surface)] rounded-xl shadow-sm hover:shadow-md"
                   >
                     {item.image ? (
@@ -380,7 +417,6 @@ export default function POS() {
               <EmptyState title="Cart is empty" description="Tap items to add them" />
             ) : (
               lines.map((line) => {
-                const basePieces = getBasePieces(line.menuItem.name);
                 const unitPrice = getLineUnitPrice(line);
                 
                 return (
@@ -555,66 +591,6 @@ export default function POS() {
       />
 
       <PaymentModal order={pendingOrder} onClose={() => setPendingOrder(null)} />
-
-      {/* Half & Half Selection Modal */}
-      <Modal open={halfModalOpen} onClose={() => setHalfModalOpen(false)} title="Create Half & Half Combo" maxWidth="max-w-md">
-        <div className="space-y-4">
-          <p className="text-xs text-[var(--text-muted)]">
-            Select two items to combine them as a Half & Half order (each will be added as a 1/2 portion).
-          </p>
-          
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-semibold mb-1 text-[var(--text-secondary)]">First Half Item</label>
-              <Select value={firstHalfId} onChange={(e) => setFirstHalfId(e.target.value)}>
-                <option value="">Select item...</option>
-                {menuData?.items.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} ({currency.format(item.discountPrice ?? item.price)})
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold mb-1 text-[var(--text-secondary)]">Second Half Item</label>
-              <Select value={secondHalfId} onChange={(e) => setSecondHalfId(e.target.value)}>
-                <option value="">Select item...</option>
-                {menuData?.items.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} ({currency.format(item.discountPrice ?? item.price)})
-                  </option>
-                ))}
-              </Select>
-            </div>
-          </div>
-
-          {firstHalfId && secondHalfId && (
-            <div className="bg-[var(--bg-surface-2)] p-3 rounded-xl border border-[var(--border-color)]">
-              <p className="text-xs font-bold uppercase text-[var(--text-muted)] mb-1">Pricing Preview</p>
-              <div className="flex justify-between text-sm">
-                <span>Combined 1/2 Portion Cost:</span>
-                <span className="font-bold text-brand-600">
-                  {(() => {
-                    const price1 = Number(menuData?.items.find((i) => i.id === firstHalfId)?.discountPrice ?? menuData?.items.find((i) => i.id === firstHalfId)?.price ?? 0);
-                    const price2 = Number(menuData?.items.find((i) => i.id === secondHalfId)?.discountPrice ?? menuData?.items.find((i) => i.id === secondHalfId)?.price ?? 0);
-                    return currency.format((price1 / 2) + (price2 / 2));
-                  })()}
-                </span>
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="ghost" onClick={() => setHalfModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddHalfAndHalf} disabled={!firstHalfId || !secondHalfId}>
-              Add to Order
-            </Button>
-          </div>
-        </div>
-      </Modal>
 
       <Modal open={openCounterModalOpen} onClose={() => setOpenCounterModalOpen(false)} title="Open Counter" maxWidth="max-w-sm">
         <div className="space-y-4">
