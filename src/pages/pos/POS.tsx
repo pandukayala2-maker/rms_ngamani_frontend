@@ -13,6 +13,7 @@ import { Button } from "../../components/ui/Button";
 import { Input, Select } from "../../components/ui/Input";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { SkeletonCards } from "../../components/ui/Skeleton";
+import { Modal } from "../../components/ui/Modal";
 import { useCategories } from "../../hooks/useCategories";
 import { useMenuItems } from "../../hooks/useMenu";
 import { useTables } from "../../hooks/useTables";
