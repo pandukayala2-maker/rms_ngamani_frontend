@@ -278,18 +278,18 @@ export default function POS() {
                   <span className="text-xs font-semibold truncate w-full">{c.name}</span>
                 </button>
               ))}
+
+              {/* Half & Half button styled exactly like categories */}
+              <button
+                onClick={() => setHalfModalOpen(true)}
+                className="flex flex-col items-center justify-center rounded-xl p-3 text-center border border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-2)] text-[var(--text-main)] transition-all"
+              >
+                <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-xl mb-2 font-bold text-amber-600 border border-amber-200">
+                  🌓
+                </div>
+                <span className="text-xs font-semibold truncate w-full">Half & Half</span>
+              </button>
             </div>
-          </div>
-          
-          {/* Half & Half button below Categories */}
-          <div className="mt-3 pt-3 border-t border-[var(--border-color)] flex-shrink-0">
-            <Button
-              variant="outline"
-              className="w-full justify-center text-xs font-bold border-brand-600/30 hover:bg-brand-50 hover:text-brand-600 py-2.5 rounded-xl transition-all"
-              onClick={() => setHalfModalOpen(true)}
-            >
-              🌓 Half & Half Combo
-            </Button>
           </div>
         </Card>
 
