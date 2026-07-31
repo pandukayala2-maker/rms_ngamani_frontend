@@ -59,11 +59,13 @@ export function useAddPayments() {
     mutationFn: async ({
       id,
       payments,
+      customerId,
     }: {
       id: string;
       payments: { method: PaymentMethod; amount: number; transactionRef?: string }[];
+      customerId?: string;
     }) => {
-      const res = await api.post<ApiResponse<Order>>(`/orders/${id}/payments`, { payments });
+      const res = await api.post<ApiResponse<Order>>(`/orders/${id}/payments`, { payments, customerId });
       return res.data.data;
     },
     onSuccess: () => {
