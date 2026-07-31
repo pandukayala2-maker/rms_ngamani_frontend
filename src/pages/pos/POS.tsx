@@ -38,6 +38,7 @@ function getBasePieces(name: string): number {
   return 1;
 }
 
+// Helper to calculate unit price based on portion and pieces settings
 function getLineUnitPrice(line: any): number {
   const basePrice = Number(line.menuItem.discountPrice ?? line.menuItem.price);
   let price = basePrice;
@@ -66,6 +67,11 @@ export default function POS() {
   const [closeCounterModalOpen, setCloseCounterModalOpen] = useState(false);
   const [closingCash, setClosingCash] = useState("");
   const [hasAutoPrompted, setHasAutoPrompted] = useState(false);
+
+  // Half & Half Modal state
+  const [halfModalOpen, setHalfModalOpen] = useState(false);
+  const [firstHalfId, setFirstHalfId] = useState("");
+  const [secondHalfId, setSecondHalfId] = useState("");
 
   const { data: currentSession, isSuccess: sessionLoaded } = useCurrentSession();
   const openSession = useOpenSession();
@@ -205,6 +211,27 @@ export default function POS() {
     );
   };
 
+  const handleAddHalfAndHalf = () => {
+    const item1 = menuData?.items.find((i) => i.id === firstHalfId);
+    const item2 = menuData?.items.find((i) => i.id === secondHalfId);
+    
+    if (!item1 || !item2) {
+      return toast.error("Please select both items");
+    }
+
+    // Add first half and second half items with portion set to HALF
+    cart.addItem(item1);
+    cart.updateLinePortion(item1.id, "HALF");
+    
+    cart.addItem(item2);
+    cart.updateLinePortion(item2.id, "HALF");
+
+    toast.success("Half & Half items added to order");
+    setFirstHalfId("");
+    setSecondHalfId("");
+    setHalfModalOpen(false);
+  };
+
   return (
     <div className="flex h-[calc(100vh-112px)] flex-col gap-4 overflow-hidden">
       <div className="grid flex-1 grid-cols-1 lg:grid-cols-[220px_1fr_360px] gap-4 min-h-0 overflow-hidden">
@@ -252,6 +279,17 @@ export default function POS() {
                 </button>
               ))}
             </div>
+          </div>
+          
+          {/* Half & Half button below Categories */}
+          <div className="mt-3 pt-3 border-t border-[var(--border-color)] flex-shrink-0">
+            <Button
+              variant="outline"
+              className="w-full justify-center text-xs font-bold border-brand-600/30 hover:bg-brand-50 hover:text-brand-600 py-2.5 rounded-xl transition-all"
+              onClick={() => setHalfModalOpen(true)}
+            >
+              🌓 Half & Half Combo
+            </Button>
           </div>
         </Card>
 
@@ -343,7 +381,6 @@ export default function POS() {
             ) : (
               lines.map((line) => {
                 const basePieces = getBasePieces(line.menuItem.name);
-                const hasMultiPieces = basePieces > 1;
                 const unitPrice = getLineUnitPrice(line);
                 
                 return (
@@ -518,6 +555,66 @@ export default function POS() {
       />
 
       <PaymentModal order={pendingOrder} onClose={() => setPendingOrder(null)} />
+
+      {/* Half & Half Selection Modal */}
+      <Modal open={halfModalOpen} onClose={() => setHalfModalOpen(false)} title="Create Half & Half Combo" maxWidth="max-w-md">
+        <div className="space-y-4">
+          <p className="text-xs text-[var(--text-muted)]">
+            Select two items to combine them as a Half & Half order (each will be added as a 1/2 portion).
+          </p>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-semibold mb-1 text-[var(--text-secondary)]">First Half Item</label>
+              <Select value={firstHalfId} onChange={(e) => setFirstHalfId(e.target.value)}>
+                <option value="">Select item...</option>
+                {menuData?.items.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} ({currency.format(item.discountPrice ?? item.price)})
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold mb-1 text-[var(--text-secondary)]">Second Half Item</label>
+              <Select value={secondHalfId} onChange={(e) => setSecondHalfId(e.target.value)}>
+                <option value="">Select item...</option>
+                {menuData?.items.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} ({currency.format(item.discountPrice ?? item.price)})
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          {firstHalfId && secondHalfId && (
+            <div className="bg-[var(--bg-surface-2)] p-3 rounded-xl border border-[var(--border-color)]">
+              <p className="text-xs font-bold uppercase text-[var(--text-muted)] mb-1">Pricing Preview</p>
+              <div className="flex justify-between text-sm">
+                <span>Combined 1/2 Portion Cost:</span>
+                <span className="font-bold text-brand-600">
+                  {(() => {
+                    const price1 = Number(menuData?.items.find((i) => i.id === firstHalfId)?.discountPrice ?? menuData?.items.find((i) => i.id === firstHalfId)?.price ?? 0);
+                    const price2 = Number(menuData?.items.find((i) => i.id === secondHalfId)?.discountPrice ?? menuData?.items.find((i) => i.id === secondHalfId)?.price ?? 0);
+                    return currency.format((price1 / 2) + (price2 / 2));
+                  })()}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="ghost" onClick={() => setHalfModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddHalfAndHalf} disabled={!firstHalfId || !secondHalfId}>
+              Add to Order
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal open={openCounterModalOpen} onClose={() => setOpenCounterModalOpen(false)} title="Open Counter" maxWidth="max-w-sm">
         <div className="space-y-4">
