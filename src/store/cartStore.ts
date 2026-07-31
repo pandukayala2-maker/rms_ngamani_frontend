@@ -8,6 +8,7 @@ export interface CartLine {
   portion?: "FULL" | "HALF";
   isSinglePiece?: boolean;
   pieces?: number;
+  basePieces?: number;
 }
 
 interface CartState {
@@ -21,7 +22,7 @@ interface CartState {
   incrementLine: (menuItemId: string, delta: number) => void;
   removeLine: (menuItemId: string) => void;
   updateLinePortion: (menuItemId: string, portion: "FULL" | "HALF") => void;
-  updateLineSinglePiece: (menuItemId: string, isSinglePiece: boolean, pieces?: number) => void;
+  updateLineSinglePiece: (menuItemId: string, isSinglePiece: boolean, pieces?: number, basePieces?: number) => void;
   setOrderType: (type: OrderType) => void;
   setTableId: (id?: string) => void;
   setCustomerId: (id?: string) => void;
@@ -29,6 +30,17 @@ interface CartState {
   setDiscount: (amount: number) => void;
   clear: () => void;
   loadFromOrder: (lines: CartLine[]) => void;
+}
+
+// Helper to parse base pieces from item name
+function getBasePiecesFromName(name: string): number {
+  const match = name.match(/(\d+)\s*(?:pcs|pc|x|pieces|piece)/i);
+  if (match) return parseInt(match[1], 10);
+  const xMatch = name.match(/(?:x)\s*(\d+)/i);
+  if (xMatch) return parseInt(xMatch[1], 10);
+  const matchX = name.match(/(\d+)\s*(?:x)/i);
+  if (matchX) return parseInt(matchX[1], 10);
+  return 1;
 }
 
 export const useCartStore = create<CartState>((set) => ({
@@ -46,7 +58,20 @@ export const useCartStore = create<CartState>((set) => ({
           ),
         };
       }
-      return { lines: [...state.lines, { menuItem: item, quantity: 1, portion: "FULL", isSinglePiece: false, pieces: 1 }] };
+      const initialBasePieces = getBasePiecesFromName(item.name);
+      return {
+        lines: [
+          ...state.lines,
+          {
+            menuItem: item,
+            quantity: 1,
+            portion: "FULL",
+            isSinglePiece: false,
+            pieces: 1,
+            basePieces: initialBasePieces,
+          },
+        ],
+      };
     }),
 
   incrementLine: (menuItemId, delta) =>
@@ -66,11 +91,16 @@ export const useCartStore = create<CartState>((set) => ({
       ),
     })),
 
-  updateLineSinglePiece: (menuItemId, isSinglePiece, pieces) =>
+  updateLineSinglePiece: (menuItemId, isSinglePiece, pieces, basePieces) =>
     set((state) => ({
       lines: state.lines.map((l) =>
         l.menuItem.id === menuItemId
-          ? { ...l, isSinglePiece, pieces: pieces !== undefined ? pieces : l.pieces }
+          ? {
+              ...l,
+              isSinglePiece,
+              pieces: pieces !== undefined ? pieces : l.pieces,
+              basePieces: basePieces !== undefined ? basePieces : l.basePieces,
+            }
           : l
       ),
     })),

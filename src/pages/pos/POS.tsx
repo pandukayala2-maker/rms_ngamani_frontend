@@ -38,7 +38,6 @@ function getBasePieces(name: string): number {
   return 1;
 }
 
-// Helper to calculate unit price based on portion and pieces settings
 function getLineUnitPrice(line: any): number {
   const basePrice = Number(line.menuItem.discountPrice ?? line.menuItem.price);
   let price = basePrice;
@@ -48,7 +47,7 @@ function getLineUnitPrice(line: any): number {
   }
   
   if (line.isSinglePiece) {
-    const basePieces = getBasePieces(line.menuItem.name);
+    const basePieces = line.basePieces || 1;
     price = (basePrice / basePieces) * (line.pieces || 1);
   }
   
@@ -382,58 +381,89 @@ export default function POS() {
                     </div>
                     
                     {/* Options Toggle for Portions and Pieces */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-dashed border-[var(--border-color)]">
-                      
-                      {/* Portion Selector */}
-                      <div className="flex rounded-lg bg-[var(--bg-surface)] p-0.5 border border-[var(--border-color)] text-[10px] font-semibold">
-                        <button
-                          onClick={() => cart.updateLinePortion(line.menuItem.id, "FULL")}
-                          className={`rounded px-2.5 py-1 transition-all ${
-                            line.portion !== "HALF"
-                              ? "bg-brand-600 text-white shadow-sm"
-                              : "text-[var(--text-secondary)] hover:text-[var(--text-main)]"
-                          }`}
-                        >
-                          Full
-                        </button>
-                        <button
-                          onClick={() => cart.updateLinePortion(line.menuItem.id, "HALF")}
-                          className={`rounded px-2.5 py-1 transition-all ${
-                            line.portion === "HALF"
-                              ? "bg-brand-600 text-white shadow-sm"
-                              : "text-[var(--text-secondary)] hover:text-[var(--text-main)]"
-                          }`}
-                        >
-                          Half
-                        </button>
+                    <div className="flex flex-col gap-2 pt-2 border-t border-dashed border-[var(--border-color)]">
+                      <div className="flex items-center justify-between gap-2">
+                        {/* Portion Selector */}
+                        <div className="flex rounded-lg bg-[var(--bg-surface)] p-0.5 border border-[var(--border-color)] text-[10px] font-semibold">
+                          <button
+                            onClick={() => cart.updateLinePortion(line.menuItem.id, "FULL")}
+                            className={`rounded px-2.5 py-1 transition-all ${
+                              line.portion !== "HALF"
+                                ? "bg-brand-600 text-white shadow-sm"
+                                : "text-[var(--text-secondary)] hover:text-[var(--text-main)]"
+                            }`}
+                          >
+                            Full
+                          </button>
+                          <button
+                            onClick={() => cart.updateLinePortion(line.menuItem.id, "HALF")}
+                            className={`rounded px-2.5 py-1 transition-all ${
+                              line.portion === "HALF"
+                                ? "bg-brand-600 text-white shadow-sm"
+                                : "text-[var(--text-secondary)] hover:text-[var(--text-main)]"
+                            }`}
+                          >
+                            Half
+                          </button>
+                        </div>
+
+                        {/* Qty Mode Selector */}
+                        <div className="flex rounded-lg bg-[var(--bg-surface)] p-0.5 border border-[var(--border-color)] text-[10px] font-semibold">
+                          <button
+                            onClick={() => cart.updateLineSinglePiece(line.menuItem.id, false)}
+                            className={`rounded px-2.5 py-1 transition-all ${
+                              !line.isSinglePiece
+                                ? "bg-brand-600 text-white shadow-sm"
+                                : "text-[var(--text-secondary)] hover:text-[var(--text-main)]"
+                            }`}
+                          >
+                            Plate
+                          </button>
+                          <button
+                            onClick={() => cart.updateLineSinglePiece(line.menuItem.id, true)}
+                            className={`rounded px-2.5 py-1 transition-all ${
+                              line.isSinglePiece
+                                ? "bg-brand-600 text-white shadow-sm"
+                                : "text-[var(--text-secondary)] hover:text-[var(--text-main)]"
+                            }`}
+                          >
+                            Piece
+                          </button>
+                        </div>
                       </div>
 
-                      {/* Pieces Selector */}
-                      {hasMultiPieces && (
-                        <div className="flex items-center gap-1">
-                          <label className="flex items-center gap-1 cursor-pointer text-[10px] font-semibold text-[var(--text-secondary)]">
-                            <input
-                              type="checkbox"
-                              className="rounded border-gray-300 text-brand-600 focus:ring-brand-500 w-3 h-3"
-                              checked={line.isSinglePiece || false}
-                              onChange={(e) => cart.updateLineSinglePiece(line.menuItem.id, e.target.checked)}
-                            />
-                            <span>Pieces:</span>
-                          </label>
-                          
-                          {line.isSinglePiece && (
-                            <select
-                              className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded px-1 py-0.5 text-[10px] font-semibold"
-                              value={line.pieces || 1}
-                              onChange={(e) => cart.updateLineSinglePiece(line.menuItem.id, true, Number(e.target.value))}
-                            >
-                              {Array.from({ length: basePieces }, (_, idx) => idx + 1).map((pcsVal) => (
-                                <option key={pcsVal} value={pcsVal}>
-                                  {pcsVal} of {basePieces}
-                                </option>
-                              ))}
-                            </select>
-                          )}
+                      {/* Custom Piece configuration panel */}
+                      {line.isSinglePiece && (
+                        <div className="flex items-center gap-1.5 justify-end text-[10px] font-semibold text-[var(--text-secondary)] bg-[var(--bg-surface)] p-1.5 rounded-lg border border-[var(--border-color)]">
+                          <span>Billing</span>
+                          <select
+                            className="bg-[var(--bg-surface-2)] border border-[var(--border-color)] rounded px-1 py-0.5 text-[10px] font-semibold focus:outline-none"
+                            value={line.pieces || 1}
+                            onChange={(e) => cart.updateLineSinglePiece(line.menuItem.id, true, Number(e.target.value), line.basePieces)}
+                          >
+                            {Array.from({ length: Math.max(10, line.basePieces || 1) }, (_, idx) => idx + 1).map((val) => (
+                              <option key={val} value={val}>
+                                {val}
+                              </option>
+                            ))}
+                          </select>
+                          <span>of</span>
+                          <select
+                            className="bg-[var(--bg-surface-2)] border border-[var(--border-color)] rounded px-1 py-0.5 text-[10px] font-semibold focus:outline-none"
+                            value={line.basePieces || 1}
+                            onChange={(e) => {
+                              const newBase = Number(e.target.value);
+                              const currentPcs = line.pieces || 1;
+                              cart.updateLineSinglePiece(line.menuItem.id, true, Math.min(currentPcs, newBase), newBase);
+                            }}
+                          >
+                            {Array.from({ length: 20 }, (_, idx) => idx + 1).map((val) => (
+                              <option key={val} value={val}>
+                                {val}
+                              </option>
+                            ))}
+                          </select>
+                          <span>pcs</span>
                         </div>
                       )}
                     </div>
