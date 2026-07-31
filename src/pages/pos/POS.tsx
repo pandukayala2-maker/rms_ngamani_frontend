@@ -288,17 +288,21 @@ export default function POS() {
                   <button
                     key={item.id}
                     onClick={() => cart.addItem(item)}
-                    className="glass-card flex flex-col items-start gap-1 p-3 text-left hover:-translate-y-0.5 transition-transform"
+                    className="glass-card flex flex-col items-start p-3 text-left hover:-translate-y-1 transition-all duration-200 border border-[var(--border-color)] bg-[var(--bg-surface)] rounded-xl shadow-sm hover:shadow-md"
                   >
                     {item.image ? (
-                      <img src={resolveAssetUrl(item.image)} alt="" className="mb-1 h-20 w-full rounded-lg object-cover" />
+                      <img src={resolveAssetUrl(item.image)} alt="" className="mb-2 h-36 w-full rounded-lg object-cover" />
                     ) : (
-                      <div className="mb-1 h-20 w-full rounded-lg bg-[var(--bg-surface-2)]" />
+                      <div className="mb-2 h-36 w-full rounded-lg bg-[var(--bg-surface-2)] flex items-center justify-center text-2xl">
+                        🍲
+                      </div>
                     )}
-                    <p className="truncate w-full text-sm font-medium">{item.name}</p>
-                    <p className="text-sm font-semibold text-brand-600">
-                      {currency.format(item.discountPrice ?? item.price)}
-                    </p>
+                    <div className="w-full pt-1">
+                      <p className="truncate w-full text-xs font-semibold text-[var(--text-main)]">{item.name}</p>
+                      <p className="text-sm font-bold text-brand-600 mt-0.5">
+                        {currency.format(item.discountPrice ?? item.price)}
+                      </p>
+                    </div>
                   </button>
                 ))}
               </div>
