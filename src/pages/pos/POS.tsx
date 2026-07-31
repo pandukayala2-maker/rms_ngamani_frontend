@@ -7,12 +7,10 @@ import {
   HiOutlineTrash,
   HiOutlineClock,
   HiOutlineQrCode,
-  HiOutlineBanknotes,
 } from "react-icons/hi2";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input, Select } from "../../components/ui/Input";
-import { Modal } from "../../components/ui/Modal";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { SkeletonCards } from "../../components/ui/Skeleton";
 import { useCategories } from "../../hooks/useCategories";
@@ -208,56 +206,58 @@ export default function POS() {
   };
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      <div className="grid flex-1 grid-cols-1 lg:grid-cols-[220px_1fr_360px] gap-4 min-h-0">
+    <div className="flex h-[calc(100vh-112px)] flex-col gap-4 overflow-hidden">
+      <div className="grid flex-1 grid-cols-1 lg:grid-cols-[220px_1fr_360px] gap-4 min-h-0 overflow-hidden">
         
-        {/* Category sidebar - Big Icons Layout */}
-        <Card className="max-h-[75vh] overflow-y-auto scrollbar-thin p-3 bg-[var(--bg-surface)]">
-          <p className="mb-3 px-1 text-xs font-semibold uppercase text-[var(--text-muted)]">Categories</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setCategoryId(undefined)}
-              className={`flex flex-col items-center justify-center rounded-xl p-3 text-center border transition-all ${
-                !categoryId 
-                  ? "bg-brand-600 text-white border-brand-600 shadow-md" 
-                  : "border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-2)] text-[var(--text-main)]"
-              }`}
-            >
-              <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center text-xl mb-2 font-bold text-brand-600">
-                🍽️
-              </div>
-              <span className="text-xs font-semibold truncate w-full">All Items</span>
-            </button>
-            {categories?.map((c) => (
+        {/* Category sidebar - Full Height Grid */}
+        <Card className="h-full flex flex-col p-3 bg-[var(--bg-surface)] overflow-hidden">
+          <p className="mb-3 px-1 text-xs font-semibold uppercase text-[var(--text-muted)] flex-shrink-0">Categories</p>
+          <div className="flex-1 overflow-y-auto scrollbar-thin pr-1">
+            <div className="grid grid-cols-2 gap-2">
               <button
-                key={c.id}
-                onClick={() => setCategoryId(c.id)}
+                onClick={() => setCategoryId(undefined)}
                 className={`flex flex-col items-center justify-center rounded-xl p-3 text-center border transition-all ${
-                  categoryId === c.id 
+                  !categoryId 
                     ? "bg-brand-600 text-white border-brand-600 shadow-md" 
                     : "border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-2)] text-[var(--text-main)]"
                 }`}
               >
-                {c.image ? (
-                  <img 
-                    src={resolveAssetUrl(c.image)} 
-                    alt="" 
-                    className="w-12 h-12 rounded-full object-cover mb-2 border border-stone-200"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-xl mb-2 font-bold">
-                    🍲
-                  </div>
-                )}
-                <span className="text-xs font-semibold truncate w-full">{c.name}</span>
+                <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center text-xl mb-2 font-bold text-brand-600">
+                  🍽️
+                </div>
+                <span className="text-xs font-semibold truncate w-full">All Items</span>
               </button>
-            ))}
+              {categories?.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setCategoryId(c.id)}
+                  className={`flex flex-col items-center justify-center rounded-xl p-3 text-center border transition-all ${
+                    categoryId === c.id 
+                      ? "bg-brand-600 text-white border-brand-600 shadow-md" 
+                      : "border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-2)] text-[var(--text-main)]"
+                  }`}
+                >
+                  {c.image ? (
+                    <img 
+                      src={resolveAssetUrl(c.image)} 
+                      alt="" 
+                      className="w-12 h-12 rounded-full object-cover mb-2 border border-stone-200"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-xl mb-2 font-bold">
+                      🍲
+                    </div>
+                  )}
+                  <span className="text-xs font-semibold truncate w-full">{c.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </Card>
 
-        {/* Product grid */}
-        <div className="space-y-3 overflow-hidden flex flex-col">
-          <div className="flex gap-2">
+        {/* Product grid - Full Height Layout */}
+        <div className="h-full space-y-3 flex flex-col overflow-hidden">
+          <div className="flex gap-2 flex-shrink-0">
             <Input
               placeholder="Search products..."
               value={search}
@@ -276,7 +276,7 @@ export default function POS() {
             </Button>
           </div>
 
-          <div className="max-h-[65vh] overflow-y-auto scrollbar-thin pr-1">
+          <div className="flex-1 overflow-y-auto scrollbar-thin pr-1">
             {isLoading ? (
               <SkeletonCards count={8} />
             ) : !menuData || menuData.items.length === 0 ? (
@@ -305,16 +305,16 @@ export default function POS() {
           </div>
         </div>
 
-        {/* Cart / Sidebar */}
-        <Card className="flex flex-col p-4">
-          <div className="mb-3 flex items-center justify-between">
+        {/* Cart / Sidebar - Full Height layout */}
+        <Card className="h-full flex flex-col p-4 overflow-hidden">
+          <div className="mb-3 flex items-center justify-between flex-shrink-0">
             <p className="font-semibold">Current Order</p>
             <Button variant="outline" size="sm" onClick={() => setHeldOpen(true)}>
               <HiOutlineClock size={14} className="mr-1" /> Held Bills
             </Button>
           </div>
 
-          <div className="mb-3 grid grid-cols-2 gap-2">
+          <div className="mb-3 grid grid-cols-2 gap-2 flex-shrink-0">
             <Select value={orderType} onChange={(e) => cart.setOrderType(e.target.value as OrderType)}>
               <option value="DINE_IN">Dine-In</option>
               <option value="TAKEAWAY">Takeaway</option>
@@ -332,8 +332,8 @@ export default function POS() {
             )}
           </div>
 
-          {/* Cart Items List - Clean Format with Half/Full & Single Pieces options */}
-          <div className="max-h-[38vh] space-y-3 overflow-y-auto scrollbar-thin pr-1">
+          {/* Cart Items List - Clean Scrollable area */}
+          <div className="flex-1 min-h-0 space-y-3 overflow-y-auto scrollbar-thin pr-1">
             {lines.length === 0 ? (
               <EmptyState title="Cart is empty" description="Tap items to add them" />
             ) : (
@@ -438,7 +438,7 @@ export default function POS() {
             )}
           </div>
 
-          <div className="mt-3 space-y-1 border-t border-[var(--border-color)] pt-3 text-sm">
+          <div className="mt-3 space-y-1 border-t border-[var(--border-color)] pt-3 text-sm flex-shrink-0">
             <div className="flex justify-between">
               <span className="text-[var(--text-secondary)]">Subtotal</span>
               <span>{currency.format(subtotal)}</span>
@@ -462,7 +462,7 @@ export default function POS() {
             </div>
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="mt-3 grid grid-cols-2 gap-2 flex-shrink-0">
             <Button variant="outline" onClick={handleHold} isLoading={createOrder.isPending}>
               Hold Bill
             </Button>
