@@ -211,6 +211,23 @@ export function PaymentModal({ order, onClose }: { order: Order | null; onClose:
               </div>
             </div>
 
+            {/* Entered & Change Return Summary Box */}
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-sm flex justify-between items-center gap-4">
+              <div className="text-center flex-1">
+                <div className="text-[10px] font-bold uppercase text-[var(--text-secondary)] tracking-wider">Total Entered</div>
+                <div className="text-2xl font-black text-[var(--text-main)] mt-1">
+                  {currency.format(enteredTotal)}
+                </div>
+              </div>
+              <div className="h-8 w-px bg-[var(--border-color)]" />
+              <div className="text-center flex-1">
+                <div className="text-[10px] font-bold uppercase text-[var(--text-secondary)] tracking-wider">Change Return</div>
+                <div className={`text-2xl font-black mt-1 ${enteredTotal > remaining ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--text-muted)]"}`}>
+                  {currency.format(Math.max(0, enteredTotal - remaining))}
+                </div>
+              </div>
+            </div>
+
             {/* Customer Details Box */}
             <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface-2)] p-4 space-y-3">
               <div className="flex items-center gap-1.5 text-xs font-bold uppercase text-[var(--text-secondary)]">
