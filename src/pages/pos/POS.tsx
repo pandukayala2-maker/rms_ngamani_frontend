@@ -8,8 +8,6 @@ import {
   HiOutlineClock,
   HiOutlineQrCode,
   HiOutlineBanknotes,
-  HiOutlineLockOpen,
-  HiOutlineLockClosed,
 } from "react-icons/hi2";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
@@ -30,7 +28,33 @@ import type { Order, OrderType } from "../../types";
 import { PaymentModal } from "./PaymentModal";
 import { HeldBillsModal } from "./HeldBillsModal";
 
-const timeFmt = new Intl.DateTimeFormat("en-IN", { hour: "2-digit", minute: "2-digit" });
+// Helper to parse base pieces from item name
+function getBasePieces(name: string): number {
+  const match = name.match(/(\d+)\s*(?:pcs|pc|x|pieces|piece)/i);
+  if (match) return parseInt(match[1], 10);
+  const xMatch = name.match(/(?:x)\s*(\d+)/i);
+  if (xMatch) return parseInt(xMatch[1], 10);
+  const matchX = name.match(/(\d+)\s*(?:x)/i);
+  if (matchX) return parseInt(matchX[1], 10);
+  return 1;
+}
+
+// Helper to calculate unit price based on portion and pieces settings
+function getLineUnitPrice(line: any): number {
+  const basePrice = Number(line.menuItem.discountPrice ?? line.menuItem.price);
+  let price = basePrice;
+  
+  if (line.portion === "HALF") {
+    price = basePrice / 2;
+  }
+  
+  if (line.isSinglePiece) {
+    const basePieces = getBasePieces(line.menuItem.name);
+    price = (basePrice / basePieces) * (line.pieces || 1);
+  }
+  
+  return price;
+}
 
 export default function POS() {
   const currency = useCurrencyFormatter();
@@ -49,9 +73,7 @@ export default function POS() {
   const openSession = useOpenSession();
   const closeSession = useCloseSession();
 
-  // Prompt to open the counter as soon as we know none is open, so the
-  // cashier sees it immediately on arriving — but it's still dismissible,
-  // not a hard gate on using the rest of the screen.
+  // Prompt to open the counter if none is open
   useEffect(() => {
     if (sessionLoaded && !currentSession && !hasAutoPrompted) {
       setOpenCounterModalOpen(true);
@@ -73,17 +95,19 @@ export default function POS() {
   const { lines, orderType, tableId, discount } = cart;
 
   const subtotal = useMemo(
-    () => lines.reduce((sum, l) => sum + (l.menuItem.discountPrice ?? l.menuItem.price) * l.quantity, 0),
+    () => lines.reduce((sum, l) => sum + getLineUnitPrice(l) * l.quantity, 0),
     [lines]
   );
+  
   const tax = useMemo(
     () =>
       lines.reduce(
-        (sum, l) => sum + ((l.menuItem.discountPrice ?? l.menuItem.price) * l.quantity * l.menuItem.tax) / 100,
+        (sum, l) => sum + (getLineUnitPrice(l) * l.quantity * l.menuItem.tax) / 100,
         0
       ),
     [lines]
   );
+  
   const total = Math.max(0, subtotal - discount + tax);
 
   const handleBarcodeSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -103,7 +127,13 @@ export default function POS() {
       {
         orderType,
         tableId: orderType === "DINE_IN" ? tableId : undefined,
-        items: lines.map((l) => ({ menuItemId: l.menuItem.id, quantity: l.quantity })),
+        items: lines.map((l) => ({
+          menuItemId: l.menuItem.id,
+          quantity: l.quantity,
+          portion: l.portion,
+          isSinglePiece: l.isSinglePiece,
+          pieces: l.pieces,
+        })),
         discount,
         isHeld: true,
       },
@@ -123,7 +153,13 @@ export default function POS() {
       {
         orderType,
         tableId: orderType === "DINE_IN" ? tableId : undefined,
-        items: lines.map((l) => ({ menuItemId: l.menuItem.id, quantity: l.quantity })),
+        items: lines.map((l) => ({
+          menuItemId: l.menuItem.id,
+          quantity: l.quantity,
+          portion: l.portion,
+          isSinglePiece: l.isSinglePiece,
+          pieces: l.pieces,
+        })),
         discount,
         isHeld: false,
       },
@@ -173,205 +209,268 @@ export default function POS() {
 
   return (
     <div className="flex h-full flex-col gap-4">
-      <div
-        className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-2.5 text-sm ${
-          currentSession
-            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-            : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-        }`}
-      >
-        <div className="flex items-center gap-2">
-          {currentSession ? <HiOutlineLockOpen size={16} /> : <HiOutlineLockClosed size={16} />}
-          {currentSession ? (
-            <span>
-              Counter open since {timeFmt.format(new Date(currentSession.openedAt))} &middot; Opening cash{" "}
-              {currency.format(currentSession.openingCash)}
-            </span>
-          ) : (
-            <span>Your counter isn&apos;t open. Open it to track cash for this shift.</span>
-          )}
-        </div>
-        {currentSession ? (
-          <Button size="sm" variant="outline" onClick={() => setCloseCounterModalOpen(true)}>
-            <HiOutlineBanknotes size={14} className="mr-1" /> Close Counter
-          </Button>
-        ) : (
-          <Button size="sm" variant="outline" onClick={() => setOpenCounterModalOpen(true)}>
-            <HiOutlineBanknotes size={14} className="mr-1" /> Open Counter
-          </Button>
-        )}
-      </div>
-
       <div className="grid flex-1 grid-cols-1 lg:grid-cols-[220px_1fr_360px] gap-4 min-h-0">
-      {/* Category sidebar */}
-      <Card className="max-h-[75vh] overflow-y-auto scrollbar-thin p-3">
-        <p className="mb-2 px-1 text-xs font-semibold uppercase text-[var(--text-muted)]">Categories</p>
-        <div className="space-y-1">
-          <button
-            onClick={() => setCategoryId(undefined)}
-            className={`w-full rounded-lg px-3 py-2 text-left text-sm ${
-              !categoryId ? "bg-brand-600 text-white" : "hover:bg-[var(--bg-surface-2)]"
-            }`}
-          >
-            All Items
-          </button>
-          {categories?.map((c) => (
+        
+        {/* Category sidebar - Big Icons Layout */}
+        <Card className="max-h-[75vh] overflow-y-auto scrollbar-thin p-3 bg-[var(--bg-surface)]">
+          <p className="mb-3 px-1 text-xs font-semibold uppercase text-[var(--text-muted)]">Categories</p>
+          <div className="grid grid-cols-2 gap-2">
             <button
-              key={c.id}
-              onClick={() => setCategoryId(c.id)}
-              className={`w-full rounded-lg px-3 py-2 text-left text-sm ${
-                categoryId === c.id ? "bg-brand-600 text-white" : "hover:bg-[var(--bg-surface-2)]"
+              onClick={() => setCategoryId(undefined)}
+              className={`flex flex-col items-center justify-center rounded-xl p-3 text-center border transition-all ${
+                !categoryId 
+                  ? "bg-brand-600 text-white border-brand-600 shadow-md" 
+                  : "border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-2)] text-[var(--text-main)]"
               }`}
             >
-              {c.name}
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      {/* Product grid */}
-      <div className="space-y-3 overflow-hidden flex flex-col">
-        <div className="flex gap-2">
-          <Input
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1"
-          />
-          <Input
-            placeholder="Scan barcode / QR..."
-            value={barcodeInput}
-            onChange={(e) => setBarcodeInput(e.target.value)}
-            onKeyDown={handleBarcodeSearch}
-            className="w-52"
-          />
-          <Button variant="outline" size="md" title="Barcode / QR scanner input">
-            <HiOutlineQrCode size={16} />
-          </Button>
-        </div>
-
-        <div className="max-h-[65vh] overflow-y-auto scrollbar-thin pr-1">
-          {isLoading ? (
-            <SkeletonCards count={8} />
-          ) : !menuData || menuData.items.length === 0 ? (
-            <EmptyState title="No items found" icon={<HiOutlineMagnifyingGlass size={32} />} />
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-              {menuData.items.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => cart.addItem(item)}
-                  className="glass-card flex flex-col items-start gap-1 p-3 text-left hover:-translate-y-0.5 transition-transform"
-                >
-                  {item.image ? (
-                    <img src={resolveAssetUrl(item.image)} alt="" className="mb-1 h-20 w-full rounded-lg object-cover" />
-                  ) : (
-                    <div className="mb-1 h-20 w-full rounded-lg bg-[var(--bg-surface-2)]" />
-                  )}
-                  <p className="truncate w-full text-sm font-medium">{item.name}</p>
-                  <p className="text-sm font-semibold text-brand-600">
-                    {currency.format(item.discountPrice ?? item.price)}
-                  </p>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Cart */}
-      <Card className="flex flex-col p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <p className="font-semibold">Current Order</p>
-          <Button variant="outline" size="sm" onClick={() => setHeldOpen(true)}>
-            <HiOutlineClock size={14} className="mr-1" /> Held Bills
-          </Button>
-        </div>
-
-        <div className="mb-3 grid grid-cols-2 gap-2">
-          <Select value={orderType} onChange={(e) => cart.setOrderType(e.target.value as OrderType)}>
-            <option value="DINE_IN">Dine-In</option>
-            <option value="TAKEAWAY">Takeaway</option>
-            <option value="DELIVERY">Delivery</option>
-          </Select>
-          {orderType === "DINE_IN" && (
-            <Select value={tableId ?? ""} onChange={(e) => cart.setTableId(e.target.value || undefined)}>
-              <option value="">Select table</option>
-              {tables?.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </Select>
-          )}
-        </div>
-
-        <div className="max-h-[32vh] space-y-2 overflow-y-auto scrollbar-thin">
-          {lines.length === 0 ? (
-            <EmptyState title="Cart is empty" description="Tap items to add them" />
-          ) : (
-            lines.map((line) => (
-              <div key={line.menuItem.id} className="flex items-center gap-2 rounded-xl bg-[var(--bg-surface-2)] p-2">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{line.menuItem.name}</p>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    {currency.format(line.menuItem.discountPrice ?? line.menuItem.price)} each
-                  </p>
-                </div>
-                <button
-                  onClick={() => cart.incrementLine(line.menuItem.id, -1)}
-                  className="rounded-md bg-[var(--bg-surface)] p-1"
-                >
-                  <HiOutlineMinus size={12} />
-                </button>
-                <span className="w-5 text-center text-sm">{line.quantity}</span>
-                <button
-                  onClick={() => cart.incrementLine(line.menuItem.id, 1)}
-                  className="rounded-md bg-[var(--bg-surface)] p-1"
-                >
-                  <HiOutlinePlus size={12} />
-                </button>
-                <button onClick={() => cart.removeLine(line.menuItem.id)} className="p-1 text-red-500">
-                  <HiOutlineTrash size={14} />
-                </button>
+              <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center text-xl mb-2 font-bold text-brand-600">
+                🍽️
               </div>
-            ))
-          )}
-        </div>
-
-        <div className="mt-3 space-y-1 border-t border-[var(--border-color)] pt-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-[var(--text-secondary)]">Subtotal</span>
-            <span>{currency.format(subtotal)}</span>
+              <span className="text-xs font-semibold truncate w-full">All Items</span>
+            </button>
+            {categories?.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setCategoryId(c.id)}
+                className={`flex flex-col items-center justify-center rounded-xl p-3 text-center border transition-all ${
+                  categoryId === c.id 
+                    ? "bg-brand-600 text-white border-brand-600 shadow-md" 
+                    : "border-[var(--border-color)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-2)] text-[var(--text-main)]"
+                }`}
+              >
+                {c.image ? (
+                  <img 
+                    src={resolveAssetUrl(c.image)} 
+                    alt="" 
+                    className="w-12 h-12 rounded-full object-cover mb-2 border border-stone-200"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-xl mb-2 font-bold">
+                    🍲
+                  </div>
+                )}
+                <span className="text-xs font-semibold truncate w-full">{c.name}</span>
+              </button>
+            ))}
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-[var(--text-secondary)]">Discount</span>
+        </Card>
+
+        {/* Product grid */}
+        <div className="space-y-3 overflow-hidden flex flex-col">
+          <div className="flex gap-2">
             <Input
-              type="number"
-              className="w-24 text-right"
-              value={discount || ""}
-              onChange={(e) => cart.setDiscount(Number(e.target.value) || 0)}
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1"
             />
+            <Input
+              placeholder="Scan barcode / QR..."
+              value={barcodeInput}
+              onChange={(e) => setBarcodeInput(e.target.value)}
+              onKeyDown={handleBarcodeSearch}
+              className="w-52"
+            />
+            <Button variant="outline" size="md" title="Barcode / QR scanner input">
+              <HiOutlineQrCode size={16} />
+            </Button>
           </div>
-          <div className="flex justify-between">
-            <span className="text-[var(--text-secondary)]">Tax</span>
-            <span>{currency.format(tax)}</span>
-          </div>
-          <div className="flex justify-between text-base font-semibold">
-            <span>Total</span>
-            <span>{currency.format(total)}</span>
+
+          <div className="max-h-[65vh] overflow-y-auto scrollbar-thin pr-1">
+            {isLoading ? (
+              <SkeletonCards count={8} />
+            ) : !menuData || menuData.items.length === 0 ? (
+              <EmptyState title="No items found" icon={<HiOutlineMagnifyingGlass size={32} />} />
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                {menuData.items.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => cart.addItem(item)}
+                    className="glass-card flex flex-col items-start gap-1 p-3 text-left hover:-translate-y-0.5 transition-transform"
+                  >
+                    {item.image ? (
+                      <img src={resolveAssetUrl(item.image)} alt="" className="mb-1 h-20 w-full rounded-lg object-cover" />
+                    ) : (
+                      <div className="mb-1 h-20 w-full rounded-lg bg-[var(--bg-surface-2)]" />
+                    )}
+                    <p className="truncate w-full text-sm font-medium">{item.name}</p>
+                    <p className="text-sm font-semibold text-brand-600">
+                      {currency.format(item.discountPrice ?? item.price)}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button variant="outline" onClick={handleHold} isLoading={createOrder.isPending}>
-            Hold Bill
-          </Button>
-          <Button onClick={handleCharge} isLoading={createOrder.isPending}>
-            Charge
-          </Button>
-        </div>
-      </Card>
+        {/* Cart / Sidebar */}
+        <Card className="flex flex-col p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="font-semibold">Current Order</p>
+            <Button variant="outline" size="sm" onClick={() => setHeldOpen(true)}>
+              <HiOutlineClock size={14} className="mr-1" /> Held Bills
+            </Button>
+          </div>
+
+          <div className="mb-3 grid grid-cols-2 gap-2">
+            <Select value={orderType} onChange={(e) => cart.setOrderType(e.target.value as OrderType)}>
+              <option value="DINE_IN">Dine-In</option>
+              <option value="TAKEAWAY">Takeaway</option>
+              <option value="DELIVERY">Delivery</option>
+            </Select>
+            {orderType === "DINE_IN" && (
+              <Select value={tableId ?? ""} onChange={(e) => cart.setTableId(e.target.value || undefined)}>
+                <option value="">Select table</option>
+                {tables?.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </div>
+
+          {/* Cart Items List - Clean Format with Half/Full & Single Pieces options */}
+          <div className="max-h-[38vh] space-y-3 overflow-y-auto scrollbar-thin pr-1">
+            {lines.length === 0 ? (
+              <EmptyState title="Cart is empty" description="Tap items to add them" />
+            ) : (
+              lines.map((line) => {
+                const basePieces = getBasePieces(line.menuItem.name);
+                const hasMultiPieces = basePieces > 1;
+                const unitPrice = getLineUnitPrice(line);
+                
+                return (
+                  <div key={line.menuItem.id} className="flex flex-col gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface-2)] p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold truncate">{line.menuItem.name}</p>
+                        <p className="text-xs text-brand-600 font-medium">
+                          {currency.format(unitPrice)} each
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-1.5 bg-[var(--bg-surface)] rounded-lg p-0.5 border border-[var(--border-color)]">
+                        <button
+                          onClick={() => cart.incrementLine(line.menuItem.id, -1)}
+                          className="rounded-md p-1 hover:bg-[var(--bg-surface-2)] text-[var(--text-secondary)] transition-colors"
+                        >
+                          <HiOutlineMinus size={12} />
+                        </button>
+                        <span className="w-6 text-center text-xs font-semibold">{line.quantity}</span>
+                        <button
+                          onClick={() => cart.incrementLine(line.menuItem.id, 1)}
+                          className="rounded-md p-1 hover:bg-[var(--bg-surface-2)] text-[var(--text-secondary)] transition-colors"
+                        >
+                          <HiOutlinePlus size={12} />
+                        </button>
+                      </div>
+                      
+                      <button 
+                        onClick={() => cart.removeLine(line.menuItem.id)} 
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors self-start"
+                      >
+                        <HiOutlineTrash size={14} />
+                      </button>
+                    </div>
+                    
+                    {/* Options Toggle for Portions and Pieces */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-dashed border-[var(--border-color)]">
+                      
+                      {/* Portion Selector */}
+                      <div className="flex rounded-lg bg-[var(--bg-surface)] p-0.5 border border-[var(--border-color)] text-[10px] font-semibold">
+                        <button
+                          onClick={() => cart.updateLinePortion(line.menuItem.id, "FULL")}
+                          className={`rounded px-2.5 py-1 transition-all ${
+                            line.portion !== "HALF"
+                              ? "bg-brand-600 text-white shadow-sm"
+                              : "text-[var(--text-secondary)] hover:text-[var(--text-main)]"
+                          }`}
+                        >
+                          Full
+                        </button>
+                        <button
+                          onClick={() => cart.updateLinePortion(line.menuItem.id, "HALF")}
+                          className={`rounded px-2.5 py-1 transition-all ${
+                            line.portion === "HALF"
+                              ? "bg-brand-600 text-white shadow-sm"
+                              : "text-[var(--text-secondary)] hover:text-[var(--text-main)]"
+                          }`}
+                        >
+                          Half
+                        </button>
+                      </div>
+
+                      {/* Pieces Selector */}
+                      {hasMultiPieces && (
+                        <div className="flex items-center gap-1">
+                          <label className="flex items-center gap-1 cursor-pointer text-[10px] font-semibold text-[var(--text-secondary)]">
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300 text-brand-600 focus:ring-brand-500 w-3 h-3"
+                              checked={line.isSinglePiece || false}
+                              onChange={(e) => cart.updateLineSinglePiece(line.menuItem.id, e.target.checked)}
+                            />
+                            <span>Pieces:</span>
+                          </label>
+                          
+                          {line.isSinglePiece && (
+                            <select
+                              className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded px-1 py-0.5 text-[10px] font-semibold"
+                              value={line.pieces || 1}
+                              onChange={(e) => cart.updateLineSinglePiece(line.menuItem.id, true, Number(e.target.value))}
+                            >
+                              {Array.from({ length: basePieces }, (_, idx) => idx + 1).map((pcsVal) => (
+                                <option key={pcsVal} value={pcsVal}>
+                                  {pcsVal} of {basePieces}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <div className="mt-3 space-y-1 border-t border-[var(--border-color)] pt-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-[var(--text-secondary)]">Subtotal</span>
+              <span>{currency.format(subtotal)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[var(--text-secondary)]">Discount</span>
+              <Input
+                type="number"
+                className="w-24 text-right"
+                value={discount || ""}
+                onChange={(e) => cart.setDiscount(Number(e.target.value) || 0)}
+              />
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[var(--text-secondary)]">Tax</span>
+              <span>{currency.format(tax)}</span>
+            </div>
+            <div className="flex justify-between text-base font-semibold">
+              <span>Total</span>
+              <span>{currency.format(total)}</span>
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <Button variant="outline" onClick={handleHold} isLoading={createOrder.isPending}>
+              Hold Bill
+            </Button>
+            <Button onClick={handleCharge} isLoading={createOrder.isPending}>
+              Charge
+            </Button>
+          </div>
+        </Card>
       </div>
 
       <HeldBillsModal

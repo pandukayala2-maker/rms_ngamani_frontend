@@ -5,6 +5,9 @@ export interface CartLine {
   menuItem: MenuItem;
   quantity: number;
   notes?: string;
+  portion?: "FULL" | "HALF";
+  isSinglePiece?: boolean;
+  pieces?: number;
 }
 
 interface CartState {
@@ -17,6 +20,8 @@ interface CartState {
   addItem: (item: MenuItem) => void;
   incrementLine: (menuItemId: string, delta: number) => void;
   removeLine: (menuItemId: string) => void;
+  updateLinePortion: (menuItemId: string, portion: "FULL" | "HALF") => void;
+  updateLineSinglePiece: (menuItemId: string, isSinglePiece: boolean, pieces?: number) => void;
   setOrderType: (type: OrderType) => void;
   setTableId: (id?: string) => void;
   setCustomerId: (id?: string) => void;
@@ -41,7 +46,7 @@ export const useCartStore = create<CartState>((set) => ({
           ),
         };
       }
-      return { lines: [...state.lines, { menuItem: item, quantity: 1 }] };
+      return { lines: [...state.lines, { menuItem: item, quantity: 1, portion: "FULL", isSinglePiece: false, pieces: 1 }] };
     }),
 
   incrementLine: (menuItemId, delta) =>
@@ -53,6 +58,22 @@ export const useCartStore = create<CartState>((set) => ({
 
   removeLine: (menuItemId) =>
     set((state) => ({ lines: state.lines.filter((l) => l.menuItem.id !== menuItemId) })),
+
+  updateLinePortion: (menuItemId, portion) =>
+    set((state) => ({
+      lines: state.lines.map((l) =>
+        l.menuItem.id === menuItemId ? { ...l, portion } : l
+      ),
+    })),
+
+  updateLineSinglePiece: (menuItemId, isSinglePiece, pieces) =>
+    set((state) => ({
+      lines: state.lines.map((l) =>
+        l.menuItem.id === menuItemId
+          ? { ...l, isSinglePiece, pieces: pieces !== undefined ? pieces : l.pieces }
+          : l
+      ),
+    })),
 
   setOrderType: (orderType) => set({ orderType }),
   setTableId: (tableId) => set({ tableId }),
