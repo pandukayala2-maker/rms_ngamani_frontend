@@ -11,7 +11,7 @@ import { useOrders, useUpdateOrderStatus } from "../../hooks/useOrders";
 import { useOrderVoiceAlerts } from "../../hooks/useOrderVoiceAlerts";
 import { useCurrencyFormatter } from "../../hooks/useCurrency";
 import { getErrorMessage } from "../../lib/axios";
-import { openReceipt } from "../../lib/receipt";
+import { openReceipt, speakOrder } from "../../lib/receipt";
 import type { Order, OrderStatus } from "../../types";
 
 const statusTone: Record<OrderStatus, "neutral" | "warning" | "good" | "critical" | "brand"> = {
@@ -51,16 +51,34 @@ export default function Orders() {
         cell: ({ row }) => <Badge tone={statusTone[row.original.status]}>{row.original.status}</Badge>,
       },
       {
-        header: "",
+        header: "Actions",
         id: "actions",
         cell: ({ row }) => {
           const next = nextStatus[row.original.status];
           return (
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                title="Print Receipt"
+                onClick={() =>
+                  openReceipt(row.original.id).catch((err) => toast.error(getErrorMessage(err)))
+                }
+              >
+                <HiOutlinePrinter size={15} className="mr-1" /> Print
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                title="Listen to order details out loud"
+                onClick={() => speakOrder(row.original)}
+              >
+                <HiOutlineSpeakerWave size={16} className="text-amber-600 hover:text-amber-700" />
+              </Button>
               {next && (
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="primary"
                   onClick={() =>
                     updateStatus.mutate(
                       { id: row.original.id, status: next },
@@ -71,15 +89,6 @@ export default function Orders() {
                   Mark {next}
                 </Button>
               )}
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() =>
-                  openReceipt(row.original.id).catch((err) => toast.error(getErrorMessage(err)))
-                }
-              >
-                <HiOutlinePrinter size={15} />
-              </Button>
             </div>
           );
         },

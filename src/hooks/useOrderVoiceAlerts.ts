@@ -1,22 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { useCurrencyFormatter } from "./useCurrency";
+import { speakOrder } from "../lib/receipt";
 import type { Order } from "../types";
 
-function speak(text: string) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 1;
-  utterance.pitch = 1;
-  window.speechSynthesis.speak(utterance);
-}
-
-// Speaks a short announcement whenever a PENDING order appears that wasn't
-// there on the previous poll. Voice starts muted until the user opts in,
-// since browsers require a user gesture before speech synthesis is allowed
-// to run reliably.
 export function useOrderVoiceAlerts(orders: Order[] | undefined) {
-  const currency = useCurrencyFormatter();
   const [enabled, setEnabled] = useState(false);
   const seenIds = useRef<Set<string> | null>(null);
 
@@ -34,20 +20,28 @@ export function useOrderVoiceAlerts(orders: Order[] | undefined) {
 
     if (enabled && newPending.length > 0) {
       for (const order of newPending) {
-        speak(
-          `New order received. Order number ${order.orderNumber.split("-").pop()}, ${order.items.length} items, total ${currency.format(order.total)}.`
-        );
+        speakOrder(order);
       }
     }
-  }, [orders, enabled, currency]);
+  }, [orders, enabled]);
 
   return {
     enabled,
     toggle: () => {
       setEnabled((prev) => {
         const next = !prev;
-        if (next) speak("Voice alerts enabled.");
-        else window.speechSynthesis?.cancel();
+        if (next) {
+          if (typeof window !== "undefined" && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance("Voice alerts enabled. Listening for new orders.");
+            utterance.rate = 0.95;
+            window.speechSynthesis.speak(utterance);
+          }
+        } else {
+          if (typeof window !== "undefined" && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+          }
+        }
         return next;
       });
     },
