@@ -7,11 +7,45 @@ function formatKD(amount: number | string): string {
   return `KD ${value.toFixed(3)}`;
 }
 
+// Helper to announce order out loud via browser speech synthesis
+export function speakOrder(order: any): void {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+
+  try {
+    window.speechSynthesis.cancel(); // Cancel any ongoing speech
+
+    const itemsSummary = order.items
+      ? order.items
+          .map((item: any) => {
+            const name = item.menuItem?.name || item.nameSnapshot || "Item";
+            const portion = item.portion === "HALF" ? "Half" : "";
+            return `${item.quantity} ${portion} ${name}`.trim();
+          })
+          .join(", ")
+      : "";
+
+    const shortNo = order.orderNumber ? order.orderNumber.split("-").pop() : "";
+    const speechText = `Order number ${shortNo}. ${itemsSummary ? `Items: ${itemsSummary}.` : ""} Total: ${Number(order.total).toFixed(3)} KD.`;
+
+    const utterance = new SpeechSynthesisUtterance(speechText);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+    utterance.lang = "en-US";
+
+    window.speechSynthesis.speak(utterance);
+  } catch (err) {
+    console.warn("Voice alert error:", err);
+  }
+}
+
 export async function openReceipt(orderId: string): Promise<void> {
   try {
     // 1. Fetch Order and Branch settings details
     const orderRes = await api.get(`/orders/${orderId}`);
     const order = orderRes.data.data;
+
+    // Speak out the order out loud
+    speakOrder(order);
 
     // Get currency settings (default to KD / KWD formatting)
     const totalPaid = order.payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
