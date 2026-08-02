@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { MenuItem, OrderType } from "../types";
 
 export interface CartLine {
+  id: string; // Unique identifier for this line in the cart
   menuItem: MenuItem;
   quantity: number;
   notes?: string;
@@ -19,10 +20,10 @@ interface CartState {
   couponCode?: string;
   discount: number;
   addItem: (item: MenuItem) => void;
-  incrementLine: (menuItemId: string, delta: number) => void;
-  removeLine: (menuItemId: string) => void;
-  updateLinePortion: (menuItemId: string, portion: "FULL" | "HALF") => void;
-  updateLineSinglePiece: (menuItemId: string, isSinglePiece: boolean, pieces?: number, basePieces?: number) => void;
+  incrementLine: (lineId: string, delta: number) => void;
+  removeLine: (lineId: string) => void;
+  updateLinePortion: (lineId: string, portion: "FULL" | "HALF") => void;
+  updateLineSinglePiece: (lineId: string, isSinglePiece: boolean, pieces?: number, basePieces?: number) => void;
   setOrderType: (type: OrderType) => void;
   setTableId: (id?: string) => void;
   setCustomerId: (id?: string) => void;
@@ -50,11 +51,14 @@ export const useCartStore = create<CartState>((set) => ({
 
   addItem: (item) =>
     set((state) => {
-      const existing = state.lines.find((l) => l.menuItem.id === item.id);
+      // Find an existing line of the same item that is in the default FULL portion / Plate mode
+      const existing = state.lines.find(
+        (l) => l.menuItem.id === item.id && l.portion === "FULL" && !l.isSinglePiece
+      );
       if (existing) {
         return {
           lines: state.lines.map((l) =>
-            l.menuItem.id === item.id ? { ...l, quantity: l.quantity + 1 } : l
+            l.id === existing.id ? { ...l, quantity: l.quantity + 1 } : l
           ),
         };
       }
@@ -63,6 +67,7 @@ export const useCartStore = create<CartState>((set) => ({
         lines: [
           ...state.lines,
           {
+            id: Math.random().toString(36).substring(7),
             menuItem: item,
             quantity: 1,
             portion: "FULL",
@@ -74,27 +79,27 @@ export const useCartStore = create<CartState>((set) => ({
       };
     }),
 
-  incrementLine: (menuItemId, delta) =>
+  incrementLine: (lineId, delta) =>
     set((state) => ({
       lines: state.lines
-        .map((l) => (l.menuItem.id === menuItemId ? { ...l, quantity: l.quantity + delta } : l))
+        .map((l) => (l.id === lineId ? { ...l, quantity: l.quantity + delta } : l))
         .filter((l) => l.quantity > 0),
     })),
 
-  removeLine: (menuItemId) =>
-    set((state) => ({ lines: state.lines.filter((l) => l.menuItem.id !== menuItemId) })),
+  removeLine: (lineId) =>
+    set((state) => ({ lines: state.lines.filter((l) => l.id !== lineId) })),
 
-  updateLinePortion: (menuItemId, portion) =>
+  updateLinePortion: (lineId, portion) =>
     set((state) => ({
       lines: state.lines.map((l) =>
-        l.menuItem.id === menuItemId ? { ...l, portion } : l
+        l.id === lineId ? { ...l, portion } : l
       ),
     })),
 
-  updateLineSinglePiece: (menuItemId, isSinglePiece, pieces, basePieces) =>
+  updateLineSinglePiece: (lineId, isSinglePiece, pieces, basePieces) =>
     set((state) => ({
       lines: state.lines.map((l) =>
-        l.menuItem.id === menuItemId
+        l.id === lineId
           ? {
               ...l,
               isSinglePiece,
@@ -120,5 +125,11 @@ export const useCartStore = create<CartState>((set) => ({
       discount: 0,
     }),
 
-  loadFromOrder: (lines) => set({ lines }),
+  loadFromOrder: (lines) =>
+    set({
+      lines: lines.map((l) => ({
+        ...l,
+        id: l.id || Math.random().toString(36).substring(7),
+      })),
+    }),
 }));

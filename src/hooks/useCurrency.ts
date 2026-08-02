@@ -8,7 +8,8 @@ import { currencySymbol } from "../lib/currency";
 export function useCurrencyFormatter(options?: { maximumFractionDigits?: number }) {
   const { data: settings } = useSettings();
   const symbol = currencySymbol(settings?.currency);
-  const maximumFractionDigits = options?.maximumFractionDigits ?? 2;
+  const isKwd = settings?.currency === "KWD" || symbol.trim() === "KD";
+  const maximumFractionDigits = options?.maximumFractionDigits ?? (isKwd ? 3 : 2);
 
   return useMemo(
     () => ({

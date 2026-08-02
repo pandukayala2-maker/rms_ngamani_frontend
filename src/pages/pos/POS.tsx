@@ -468,7 +468,7 @@ export default function POS() {
                 const unitPrice = getLineUnitPrice(line);
                 
                 return (
-                  <div key={line.menuItem.id} className="flex flex-col gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface-2)] p-3">
+                  <div key={line.id} className="flex flex-col gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface-2)] p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold truncate">{line.menuItem.name}</p>
@@ -479,14 +479,14 @@ export default function POS() {
                       
                       <div className="flex items-center gap-1.5 bg-[var(--bg-surface)] rounded-lg p-0.5 border border-[var(--border-color)]">
                         <button
-                          onClick={() => cart.incrementLine(line.menuItem.id, -1)}
+                          onClick={() => cart.incrementLine(line.id, -1)}
                           className="rounded-md p-1 hover:bg-[var(--bg-surface-2)] text-[var(--text-secondary)] transition-colors"
                         >
                           <HiOutlineMinus size={12} />
                         </button>
                         <span className="w-6 text-center text-xs font-semibold">{line.quantity}</span>
                         <button
-                          onClick={() => cart.incrementLine(line.menuItem.id, 1)}
+                          onClick={() => cart.incrementLine(line.id, 1)}
                           className="rounded-md p-1 hover:bg-[var(--bg-surface-2)] text-[var(--text-secondary)] transition-colors"
                         >
                           <HiOutlinePlus size={12} />
@@ -494,7 +494,7 @@ export default function POS() {
                       </div>
                       
                       <button 
-                        onClick={() => cart.removeLine(line.menuItem.id)} 
+                        onClick={() => cart.removeLine(line.id)} 
                         className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors self-start"
                       >
                         <HiOutlineTrash size={14} />
@@ -507,7 +507,7 @@ export default function POS() {
                         {/* Portion Selector */}
                         <div className="flex rounded-lg bg-[var(--bg-surface)] p-0.5 border border-[var(--border-color)] text-[10px] font-semibold">
                           <button
-                            onClick={() => cart.updateLinePortion(line.menuItem.id, "FULL")}
+                            onClick={() => cart.updateLinePortion(line.id, "FULL")}
                             className={`rounded px-2.5 py-1 transition-all ${
                               line.portion !== "HALF"
                                 ? "bg-brand-600 text-white shadow-sm"
@@ -517,7 +517,7 @@ export default function POS() {
                             Full
                           </button>
                           <button
-                            onClick={() => cart.updateLinePortion(line.menuItem.id, "HALF")}
+                            onClick={() => cart.updateLinePortion(line.id, "HALF")}
                             className={`rounded px-2.5 py-1 transition-all ${
                               line.portion === "HALF"
                                 ? "bg-brand-600 text-white shadow-sm"
@@ -531,7 +531,7 @@ export default function POS() {
                         {/* Qty Mode Selector */}
                         <div className="flex rounded-lg bg-[var(--bg-surface)] p-0.5 border border-[var(--border-color)] text-[10px] font-semibold">
                           <button
-                            onClick={() => cart.updateLineSinglePiece(line.menuItem.id, false)}
+                            onClick={() => cart.updateLineSinglePiece(line.id, false)}
                             className={`rounded px-2.5 py-1 transition-all ${
                               !line.isSinglePiece
                                 ? "bg-brand-600 text-white shadow-sm"
@@ -541,7 +541,7 @@ export default function POS() {
                             Plate
                           </button>
                           <button
-                            onClick={() => cart.updateLineSinglePiece(line.menuItem.id, true)}
+                            onClick={() => cart.updateLineSinglePiece(line.id, true)}
                             className={`rounded px-2.5 py-1 transition-all ${
                               line.isSinglePiece
                                 ? "bg-brand-600 text-white shadow-sm"
@@ -560,7 +560,7 @@ export default function POS() {
                           <select
                             className="bg-[var(--bg-surface-2)] border border-[var(--border-color)] rounded px-1 py-0.5 text-[10px] font-semibold focus:outline-none"
                             value={line.pieces || 1}
-                            onChange={(e) => cart.updateLineSinglePiece(line.menuItem.id, true, Number(e.target.value), line.basePieces)}
+                            onChange={(e) => cart.updateLineSinglePiece(line.id, true, Number(e.target.value), line.basePieces)}
                           >
                             {Array.from({ length: Math.max(10, line.basePieces || 1) }, (_, idx) => idx + 1).map((val) => (
                               <option key={val} value={val}>
@@ -575,7 +575,7 @@ export default function POS() {
                             onChange={(e) => {
                               const newBase = Number(e.target.value);
                               const currentPcs = line.pieces || 1;
-                              cart.updateLineSinglePiece(line.menuItem.id, true, Math.min(currentPcs, newBase), newBase);
+                              cart.updateLineSinglePiece(line.id, true, Math.min(currentPcs, newBase), newBase);
                             }}
                           >
                             {Array.from({ length: 20 }, (_, idx) => idx + 1).map((val) => (
