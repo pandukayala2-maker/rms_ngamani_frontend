@@ -338,6 +338,17 @@ export default function POS() {
                 </div>
                 <span className="text-xs font-semibold truncate w-full">Half & Half</span>
               </button>
+
+              {/* Close Counter button styled exactly like categories */}
+              <button
+                onClick={() => setCloseCounterModalOpen(true)}
+                className="flex flex-col items-center justify-center rounded-xl p-3 text-center border border-red-200 bg-red-50/50 hover:bg-red-100/50 hover:border-red-300 text-red-700 transition-all"
+              >
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-xl mb-2 font-bold text-red-600 border border-red-200">
+                  🔒
+                </div>
+                <span className="text-xs font-semibold truncate w-full">Close Shift</span>
+              </button>
             </div>
           </div>
         </Card>
