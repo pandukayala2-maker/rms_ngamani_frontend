@@ -233,6 +233,43 @@ export default function POS() {
     );
   };
 
+  if (sessionLoaded && !currentSession) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-base)]">
+        <Card className="w-full max-w-sm p-6 shadow-xl border border-[var(--border-color)] bg-[var(--bg-surface)]">
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-50 text-brand-600 text-3xl mb-3 font-bold border border-brand-200">
+              🏪
+            </div>
+            <h2 className="text-xl font-bold text-[var(--text-main)]">Open POS Counter</h2>
+            <p className="text-xs text-[var(--text-muted)] mt-1 font-medium">Please set your opening cash drawer amount to start selling.</p>
+          </div>
+          <div className="space-y-4">
+            <Input
+              label="Opening Cash Amount (KD)"
+              type="number"
+              min={0}
+              value={openingCash}
+              onChange={(e) => setOpeningCash(e.target.value)}
+              placeholder="0.00"
+              className="text-center font-bold text-lg"
+              autoFocus
+            />
+            <div className="flex gap-2 pt-2">
+              <Button 
+                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-xl transition-all"
+                onClick={handleOpenCounter} 
+                isLoading={openSession.isPending}
+              >
+                Start Session / Open Counter
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-[calc(100vh-112px)] flex-col gap-4 overflow-hidden">
       <div className="grid flex-1 grid-cols-1 lg:grid-cols-[220px_1fr_360px] gap-4 min-h-0 overflow-hidden">
@@ -592,26 +629,7 @@ export default function POS() {
 
       <PaymentModal order={pendingOrder} onClose={() => setPendingOrder(null)} />
 
-      <Modal open={openCounterModalOpen} onClose={() => setOpenCounterModalOpen(false)} title="Open Counter" maxWidth="max-w-sm">
-        <div className="space-y-4">
-          <Input
-            label="Opening Cash"
-            type="number"
-            min={0}
-            value={openingCash}
-            onChange={(e) => setOpeningCash(e.target.value)}
-            placeholder="0"
-          />
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setOpenCounterModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleOpenCounter} isLoading={openSession.isPending}>
-              Open Counter
-            </Button>
-          </div>
-        </div>
-      </Modal>
+
 
       <Modal open={closeCounterModalOpen} onClose={() => setCloseCounterModalOpen(false)} title="Close Counter" maxWidth="max-w-sm">
         <div className="space-y-4">
