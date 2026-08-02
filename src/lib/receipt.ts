@@ -1,8 +1,10 @@
 import { api } from "./axios";
 
 // Helper to format currency
-function formatKD(amount: number): string {
-  return `KD ${amount.toFixed(3)}`;
+function formatKD(amount: number | string): string {
+  const num = typeof amount === "string" ? parseFloat(amount) : amount;
+  const value = Number.isFinite(num) ? num : 0;
+  return `KD ${value.toFixed(3)}`;
 }
 
 export async function openReceipt(orderId: string): Promise<void> {
