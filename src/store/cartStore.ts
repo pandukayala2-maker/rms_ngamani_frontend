@@ -19,7 +19,7 @@ interface CartState {
   customerId?: string;
   couponCode?: string;
   discount: number;
-  addItem: (item: MenuItem) => void;
+  addItem: (item: MenuItem, portion?: "FULL" | "HALF") => void;
   incrementLine: (lineId: string, delta: number) => void;
   removeLine: (lineId: string) => void;
   updateLinePortion: (lineId: string, portion: "FULL" | "HALF") => void;
@@ -49,11 +49,11 @@ export const useCartStore = create<CartState>((set) => ({
   orderType: "DINE_IN",
   discount: 0,
 
-  addItem: (item) =>
+  addItem: (item, portion = "FULL") =>
     set((state) => {
-      // Find an existing line of the same item that is in the default FULL portion / Plate mode
+      // Find an existing line of the same item that is in the requested portion / Plate mode
       const existing = state.lines.find(
-        (l) => l.menuItem.id === item.id && l.portion === "FULL" && !l.isSinglePiece
+        (l) => l.menuItem.id === item.id && l.portion === portion && !l.isSinglePiece
       );
       if (existing) {
         return {
@@ -70,7 +70,7 @@ export const useCartStore = create<CartState>((set) => ({
             id: Math.random().toString(36).substring(7),
             menuItem: item,
             quantity: 1,
-            portion: "FULL",
+            portion,
             isSinglePiece: false,
             pieces: 1,
             basePieces: initialBasePieces,

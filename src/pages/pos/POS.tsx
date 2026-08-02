@@ -130,13 +130,8 @@ export default function POS() {
         setFirstHalfItem(item);
         toast.info(`First half: ${item.name} selected. Now select the second half.`);
       } else {
-        // Prevent selecting the same item ID for both halves in this mode if desired, 
-        // but technically possible to have half and half of same item. Let's just allow it or keep it simple.
-        cart.addItem(firstHalfItem);
-        cart.updateLinePortion(firstHalfItem.id, "HALF");
-        
-        cart.addItem(item);
-        cart.updateLinePortion(item.id, "HALF");
+        cart.addItem(firstHalfItem, "HALF");
+        cart.addItem(item, "HALF");
 
         toast.success(`Added Half & Half: ${firstHalfItem.name} + ${item.name}`);
         setFirstHalfItem(null);
